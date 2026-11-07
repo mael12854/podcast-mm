@@ -24,6 +24,14 @@ export function fmtDate(iso, long = false) {
   return `${Number(m[3])} ${months[Number(m[2]) - 1]} ${m[1]}`;
 }
 
+// Rend les adresses web cliquables dans un texte déjà échappé (descriptions écrites depuis l'admin).
+export function linkify(escaped) {
+  return escaped.replace(/\bhttps?:\/\/[^\s<]+[^\s<.,;:!?)»]/g, (url) => {
+    const label = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    return `<a href="${url}" target="_blank" rel="noopener nofollow">${label}<span class="sr-only"> (nouvel onglet)</span></a>`;
+  });
+}
+
 export function paragraphs(desc) {
   return String(desc || '').split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 }

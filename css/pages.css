@@ -102,7 +102,7 @@
 }
 .ep-body__col { display: flex; flex-direction: column; gap: 10px; }
 .ep-body__col--text { gap: 14px; }
-.ep-body__col--text p:not(.kicker) { font-size: clamp(16px, 1.4vw, 18px); line-height: 1.7; color: var(--dm-white); text-wrap: pretty; max-width: 68ch; }
+.ep-body__col--text p:not(.kicker) { font-size: clamp(16px, 1.4vw, 18px); line-height: 1.7; color: var(--dm-white); text-wrap: pretty; max-width: 68ch; white-space: pre-line; overflow-wrap: anywhere; }
 .spotify-embed { display: block; width: 100%; height: 152px; border: 0; border-radius: 12px; background: var(--dm-surface-1); }
 .embed-note { font-size: var(--dm-fs-caption); color: var(--dm-text-faint); }
 

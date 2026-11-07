@@ -1,5 +1,5 @@
 // Page épisode : en-tête, lecteur Spotify, texte, galerie des dessins, « À écouter aussi ».
-import { loadEpisodes, catBadge, specialBadges, metaLine, paragraphs, shortOf, esc, waves, spotifyEpisodeId,
+import { loadEpisodes, linkify, catBadge, specialBadges, metaLine, paragraphs, shortOf, esc, waves, spotifyEpisodeId,
   renderMiniCard, imgSrc, imgSrcset, imgFallback, TAPES, TILTS, SHOW_URL } from './site.js';
 import { openLightbox } from './lightbox.js';
 import { initReviews } from './avis.js';
@@ -82,7 +82,7 @@ function render(ep, all) {
     </div>
     <div class="ep-body__col ep-body__col--text">
       <h2 class="kicker">L'ÉPISODE</h2>
-      ${paragraphs(ep.description).map((p) => `<p>${esc(p)}</p>`).join('')}
+      ${paragraphs(ep.description).map((p) => `<p>${linkify(esc(p))}</p>`).join('')}
     </div>
   </section>
 
