@@ -1,7 +1,6 @@
 /* Double M — espace admin (pensé d'abord pour téléphone) */
 
 body.admin { background: var(--dm-night); }
-[hidden] { display: none !important; }
 
 /* ---------- Connexion ---------- */
 .login {
@@ -129,43 +128,6 @@ body.admin { background: var(--dm-night); }
 .back-btn:hover { color: var(--dm-white); }
 .form { display: flex; flex-direction: column; gap: 22px; transition: opacity var(--dm-dur) var(--dm-ease); }
 .form.is-busy { opacity: .5; pointer-events: none; }
-.field { display: flex; flex-direction: column; gap: var(--dm-space-2); min-width: 0; border: 0; padding: 0; margin: 0; }
-.field__label { display: flex; justify-content: space-between; gap: var(--dm-space-2); font-size: 14px; font-weight: 600; padding: 0; }
-.field__label .opt { font-weight: 500; color: var(--dm-text-faint); }
-.field__count { font: 500 12px ui-monospace, Menlo, Consolas, monospace; color: var(--dm-text-faint); }
-.field__help { font-size: var(--dm-fs-caption); color: var(--dm-text-faint); line-height: 1.45; }
-.input {
-  width: 100%; height: 52px; border-radius: var(--dm-radius-sm); background: var(--dm-surface-2);
-  border: 1.5px solid color-mix(in srgb, var(--dm-lavender) 35%, transparent);
-  padding: 0 16px; font-size: 16px; color: var(--dm-white); outline: none;
-  transition: border-color var(--dm-dur) var(--dm-ease), box-shadow var(--dm-dur) var(--dm-ease);
-}
-textarea.input { height: auto; min-height: 160px; padding: 14px 16px; line-height: 1.6; resize: vertical; }
-input[type="date"].input { color-scheme: dark; }
-.input:focus, .input:focus-visible { border-color: var(--dm-gold-light); box-shadow: 0 0 0 4px color-mix(in srgb, var(--dm-gold-light) 18%, transparent); border-radius: var(--dm-radius-sm); }
-.input[aria-invalid="true"] { border-color: var(--dm-live); }
-.input--sm { height: 44px; font-size: 15px; padding: 0 12px; }
-.input-wrap { position: relative; display: flex; }
-.input-wrap .input { padding-right: 96px; }
-.reveal {
-  position: absolute; right: 4px; top: 4px; height: 44px; padding: 0 12px; border: none; background: none;
-  color: var(--dm-gold-light); font: 600 13px var(--dm-font); border-radius: var(--dm-radius-sm);
-}
-.static-field {
-  height: 52px; border-radius: var(--dm-radius-sm); background: var(--dm-field-disabled);
-  border: 1.5px dashed color-mix(in srgb, var(--dm-lavender) 25%, transparent);
-  padding: 0 16px; display: flex; align-items: center; font-size: 16px; color: var(--dm-text-faint);
-}
-.field--muted .field__label { color: var(--dm-text-faint); }
-.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--dm-space-4); }
-.err {
-  display: flex; gap: var(--dm-space-2); align-items: flex-start; font-size: var(--dm-fs-caption); line-height: 1.45; color: var(--dm-error-text);
-}
-.err::before {
-  content: "!"; flex: none; width: 16px; height: 16px; margin-top: 1px; border-radius: 50%;
-  background: var(--dm-live); color: var(--dm-night); font-weight: 800; font-size: 11px; line-height: 16px; text-align: center;
-}
-
 /* Catégorie : vrais boutons radio, habillés en pastilles */
 .cats { display: flex; flex-wrap: wrap; gap: var(--dm-space-2); }
 .cat-opt { position: relative; }
@@ -271,3 +233,15 @@ input[type="date"].input { color-scheme: dark; }
 @media (prefers-reduced-motion: reduce) {
   .spinner { animation: none !important; border-top-color: var(--dm-gold-light); }
 }
+
+/* ---------- Avis dans la liste admin ---------- */
+.avis-admin { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.avis-admin__item {
+  display: flex; flex-direction: column; gap: 6px; align-items: flex-start;
+  padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--dm-night-deep) 45%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dm-lavender) 22%, transparent);
+}
+.avis-admin__top { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 15px; }
+.avis-admin__stars { color: var(--dm-gold); letter-spacing: 1px; }
+.avis-admin__stars span { color: color-mix(in srgb, var(--dm-lavender) 45%, transparent); }
+.avis-admin__item p { font-size: 14px; line-height: 1.5; color: var(--dm-text-muted); overflow-wrap: anywhere; }

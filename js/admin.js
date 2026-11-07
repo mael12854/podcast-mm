@@ -21,6 +21,9 @@ const badge = (cat, size = 'list') => `<span class="badge badge--${CATS[cat] ? c
 
 const state = {
   episodes: [],
+  avis: [],
+  openAvisId: null,
+  confirmAvisId: null,
   version: null,
   view: null,
   confirmId: null,
@@ -185,9 +188,13 @@ function listNotice(kind, html) {
 async function loadList() {
   $('#rows').innerHTML = '<li class="loading-note">Chargement des épisodes…</li>';
   try {
-    const data = await api('GET', '/api/episodes');
+    const [data, avis] = await Promise.all([
+      api('GET', '/api/episodes'),
+      api('GET', '/api/avis?all=1').catch((e) => { if (e.code === 'session') throw e; return { avis: [] }; }),
+    ]);
     state.episodes = data.episodes;
     state.version = data.version;
+    state.avis = avis.avis || [];
     renderList();
   } catch (ex) {
     if (ex.code === 'session') return;
@@ -207,13 +214,15 @@ function renderList() {
   $('#rows').innerHTML = state.episodes.map((ep) => {
     const confirm = state.confirmId === ep.id;
     const nDraw = (ep.dessins || []).length;
+    const epAvis = state.avis.filter((a) => a.episodeId === ep.id);
+    const avisOpen = state.openAvisId === ep.id && epAvis.length;
     return `
     <li class="row ${confirm ? 'row--confirm' : ''}" data-id="${esc(ep.id)}">
       <div class="row__main">
         <span class="num-tile num-tile--sm" aria-hidden="true">${esc(ep.numero)}</span>
         <div class="row__info">
           <strong class="row__title"><span class="sr-only">N° ${esc(ep.numero)} : </span>${esc(ep.titre)}</strong>
-          <div class="row__meta">${badge(ep.categorie)}<span>${esc(fmtDate(ep.date))}</span>${ep.categorie === 'dessin' ? `<span>· ${nDraw} dessin${nDraw > 1 ? 's' : ''}</span>` : ''}</div>
+          <div class="row__meta">${badge(ep.categorie)}<span>${esc(fmtDate(ep.date))}</span>${ep.categorie === 'dessin' ? `<span>· ${nDraw} dessin${nDraw > 1 ? 's' : ''}</span>` : ''}${epAvis.length ? `<span>· ${epAvis.length} avis</span>` : ''}</div>
         </div>
       </div>
       ${confirm ? `
@@ -225,10 +234,20 @@ function renderList() {
         </div>
       </div>` : `
       <div class="row__actions">
+        ${epAvis.length ? `<button class="pill-btn pill-btn--ghost" type="button" data-act="avis" aria-expanded="${avisOpen ? 'true' : 'false'}">Avis (${epAvis.length})</button>` : ''}
         <a class="pill-btn pill-btn--ghost" href="/episode?id=${encodeURIComponent(ep.id)}" target="_blank" rel="noopener">Voir<span class="sr-only"> « ${esc(ep.titre)} » (nouvel onglet)</span></a>
         <button class="pill-btn pill-btn--lav" type="button" data-act="edit"><span aria-hidden="true">✎ </span>Modifier<span class="sr-only"> « ${esc(ep.titre)} »</span></button>
         <button class="pill-btn pill-btn--danger" type="button" data-act="ask">Supprimer<span class="sr-only"> « ${esc(ep.titre)} »</span></button>
       </div>`}
+      ${avisOpen ? `
+      <ul class="avis-admin" aria-label="Avis sur « ${esc(ep.titre)} »">
+        ${epAvis.map((a) => `
+        <li class="avis-admin__item" data-avis="${esc(a.id)}">
+          <div class="avis-admin__top"><strong>${esc(a.prenom)}</strong><span class="avis-admin__stars" aria-label="${a.note} sur 5">${'★'.repeat(a.note)}<span>${'★'.repeat(5 - a.note)}</span></span><span class="meta">${esc(fmtDate(a.date))}</span></div>
+          <p>${esc(a.message)}</p>
+          <button class="pill-btn ${state.confirmAvisId === a.id ? 'pill-btn--solid-danger' : 'pill-btn--danger'}" type="button" data-act="del-avis">${state.confirmAvisId === a.id ? 'Oui, supprimer cet avis' : 'Supprimer l\'avis'}<span class="sr-only"> de ${esc(a.prenom)}</span></button>
+        </li>`).join('')}
+      </ul>` : ''}
     </li>`;
   }).join('');
 }
@@ -240,6 +259,24 @@ $('#rows').addEventListener('click', async (e) => {
   const ep = state.episodes.find((x) => x.id === id);
   const act = btn.dataset.act;
   if (act === 'edit') return openForm(ep);
+  if (act === 'avis') { state.openAvisId = state.openAvisId === id ? null : id; state.confirmAvisId = null; renderList(); $(`.row[data-id="${CSS.escape(id)}"] [data-act="avis"]`)?.focus(); return; }
+  if (act === 'del-avis') {
+    const avisId = btn.closest('[data-avis]').dataset.avis;
+    if (state.confirmAvisId !== avisId) { state.confirmAvisId = avisId; renderList(); $(`[data-avis="${CSS.escape(avisId)}"] [data-act="del-avis"]`)?.focus(); return; }
+    btn.disabled = true; btn.textContent = 'Suppression…';
+    try {
+      await api('DELETE', `/api/avis?id=${encodeURIComponent(avisId)}`);
+      state.avis = state.avis.filter((a) => a.id !== avisId);
+      state.confirmAvisId = null;
+      if (!state.avis.some((a) => a.episodeId === id)) state.openAvisId = null;
+      listNotice('ok', 'L\'avis a été supprimé. Il a disparu du site.');
+      renderList();
+    } catch (ex) {
+      state.confirmAvisId = null;
+      if (ex.code !== 'session') { listNotice('err', `<strong>La suppression n'a pas marché.</strong><span>${esc(ex.error)}</span>`); renderList(); }
+    }
+    return;
+  }
   if (act === 'ask') { state.confirmId = id; listNotice(null); renderList(); $(`.row[data-id="${CSS.escape(id)}"] [data-act="cancel"]`)?.focus(); return; }
   if (act === 'cancel') { state.confirmId = null; renderList(); $(`.row[data-id="${CSS.escape(id)}"] [data-act="ask"]`)?.focus(); return; }
   if (act === 'delete') {

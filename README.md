@@ -70,6 +70,17 @@ Côté sécurité :
 
 **Modifier** ou **supprimer** un épisode se fait depuis la liste. Une suppression retire l'épisode et ses dessins du site, pas de Spotify.
 
+### Les avis des auditeurs
+
+Sous chaque épisode, les auditeurs peuvent laisser un avis : prénom, note de 1 à 5 étoiles et message (300 caractères max). **L'avis est publié tout de suite**, sans relecture. Garde-fous :
+- les liens sont refusés (dans le prénom comme dans le message) ;
+- 3 avis maximum par personne toutes les 10 minutes ;
+- un piège invisible bloque les robots.
+
+**Supprimer un avis** : dans l'admin, appuie sur **Avis (N)** sous l'épisode, puis sur **Supprimer l'avis** et confirme. L'avis disparaît du site dans les secondes qui suivent.
+
+Les avis sont rangés dans `data/avis.json`. Chaque avis fait un petit commit (« Avis sur « <titre> » : <prénom> »), mais **ne redéploie pas le site** (réglage `ignoreCommand` de `vercel.json`) : la page épisode lit les avis en direct. Supprimer un épisode supprime aussi ses avis.
+
 ### Si ça ne marche pas
 
 | Message | Quoi faire |
@@ -94,14 +105,16 @@ css/components.css      header, footer, cartes, galerie, visionneuse
 css/pages.css           styles propres à chaque page
 css/admin.css           styles de l'admin
 js/site.js              outils communs (chargement des épisodes, cartes, menu mobile)
-js/home.js, episodes.js, episode.js, about.js, lightbox.js
+js/home.js, episodes.js, episode.js, about.js, lightbox.js, avis.js
 js/admin.js             logique de l'admin
 js/image-compress.js    compression des dessins avant l'envoi
 api/login.js, logout.js, session.js
 api/upload.js           envoie une image sur GitHub (sans commit)
 api/episodes.js         lit, ajoute, modifie, supprime (un commit par action)
+api/avis.js             avis des auditeurs (lecture publique, envoi, suppression par l'admin)
 api/_lib/               session signée + client GitHub
 data/episodes.json      les épisodes
+data/avis.json          les avis des auditeurs
 images/dessins/<id>/    les dessins de chaque épisode
 images/logo/            logo SVG (contours Poppins Bold), favicon, pochette
 audio/                  jingles (le court joue sur « Écouter les 5 notes »)

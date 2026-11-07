@@ -23,6 +23,8 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+[hidden] { display: none !important; }
+
 main { flex: 1; display: block; min-width: 0; width: 100%; }
 
 img, svg { display: block; max-width: 100%; }

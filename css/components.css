@@ -230,6 +230,45 @@
 .lightbox__caption strong { font-size: 16px; line-height: 1.35; }
 .lightbox__caption span { font: 500 13px ui-monospace, Menlo, Consolas, monospace; color: var(--dm-text-muted); }
 
+/* ---------- Champs de formulaire (admin + avis) ---------- */
+.field { display: flex; flex-direction: column; gap: var(--dm-space-2); min-width: 0; border: 0; padding: 0; margin: 0; }
+.field__label { display: flex; justify-content: space-between; gap: var(--dm-space-2); font-size: 14px; font-weight: 600; padding: 0; }
+.field__label .opt { font-weight: 500; color: var(--dm-text-faint); }
+.field__count { font: 500 12px ui-monospace, Menlo, Consolas, monospace; color: var(--dm-text-faint); }
+.field__help { font-size: var(--dm-fs-caption); color: var(--dm-text-faint); line-height: 1.45; }
+.input {
+  width: 100%; height: 52px; border-radius: var(--dm-radius-sm); background: var(--dm-surface-2);
+  border: 1.5px solid color-mix(in srgb, var(--dm-lavender) 35%, transparent);
+  padding: 0 16px; font-size: 16px; color: var(--dm-white); outline: none;
+  transition: border-color var(--dm-dur) var(--dm-ease), box-shadow var(--dm-dur) var(--dm-ease);
+}
+textarea.input { height: auto; min-height: 160px; padding: 14px 16px; line-height: 1.6; resize: vertical; }
+input[type="date"].input { color-scheme: dark; }
+.input:focus, .input:focus-visible { border-color: var(--dm-gold-light); box-shadow: 0 0 0 4px color-mix(in srgb, var(--dm-gold-light) 18%, transparent); border-radius: var(--dm-radius-sm); }
+.input[aria-invalid="true"] { border-color: var(--dm-live); }
+.input--sm { height: 44px; font-size: 15px; padding: 0 12px; }
+.input-wrap { position: relative; display: flex; }
+.input-wrap .input { padding-right: 96px; }
+.reveal {
+  position: absolute; right: 4px; top: 4px; height: 44px; padding: 0 12px; border: none; background: none;
+  color: var(--dm-gold-light); font: 600 13px var(--dm-font); border-radius: var(--dm-radius-sm);
+}
+.static-field {
+  height: 52px; border-radius: var(--dm-radius-sm); background: var(--dm-field-disabled);
+  border: 1.5px dashed color-mix(in srgb, var(--dm-lavender) 25%, transparent);
+  padding: 0 16px; display: flex; align-items: center; font-size: 16px; color: var(--dm-text-faint);
+}
+.field--muted .field__label { color: var(--dm-text-faint); }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--dm-space-4); }
+.err {
+  display: flex; gap: var(--dm-space-2); align-items: flex-start; font-size: var(--dm-fs-caption); line-height: 1.45; color: var(--dm-error-text);
+}
+.err::before {
+  content: "!"; flex: none; width: 16px; height: 16px; margin-top: 1px; border-radius: 50%;
+  background: var(--dm-live); color: var(--dm-night); font-weight: 800; font-size: 11px; line-height: 16px; text-align: center;
+}
+
+
 /* ---------- États ---------- */
 .empty {
   padding: 40px 20px; border-radius: var(--dm-radius-md);
