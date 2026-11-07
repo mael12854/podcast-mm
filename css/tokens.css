@@ -1,0 +1,86 @@
+/* Double M — design tokens v1.0 (La Compagnie M&M) */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Couleurs — principales */
+  --dm-night: #1d1642;
+  --dm-night-deep: #0d0a1f;
+  --dm-night-glow: #3a2a7a;
+  --dm-gold-light: #FFE07A;
+  --dm-gold: #FFB627;
+  --dm-coral: #FF5A4E;
+  --dm-white: #FFFFFF;
+  /* Couleurs — secondaires & fonctionnelles */
+  --dm-lavender: #8f7cff;
+  --dm-live: #FF4D5E;
+  --dm-success: #5EE0A8;
+  --dm-text: #FFFFFF;
+  --dm-text-muted: #C9C2EE;
+  --dm-text-faint: #9a92c7;          /* légendes ≥ 13px, contraste 5.6:1 */
+  --dm-surface-1: #251c52;           /* cartes */
+  --dm-surface-2: #2e2463;           /* cartes survolées, champs */
+  --dm-line: rgba(143, 124, 255, .28);
+  --dm-line-strong: rgba(143, 124, 255, .55);
+  --dm-wave: rgba(143, 124, 255, .22);
+  /* Dégradés */
+  --dm-grad-gold: linear-gradient(180deg, var(--dm-gold-light) 0%, var(--dm-gold) 100%);
+  --dm-grad-night: radial-gradient(120% 90% at 50% 40%, var(--dm-night-glow) 0%, var(--dm-night) 48%, var(--dm-night-deep) 100%);
+  /* Catégories */
+  --dm-cat-chronique-bg: var(--dm-gold);     --dm-cat-chronique-fg: var(--dm-night);
+  --dm-cat-parents-bg: var(--dm-coral);      --dm-cat-parents-fg: var(--dm-night);
+  --dm-cat-dessin-bg: var(--dm-lavender);    --dm-cat-dessin-fg: var(--dm-night-deep);
+
+  /* Typographie */
+  --dm-font: 'Poppins', system-ui, sans-serif;
+  --dm-fs-h1: clamp(2.5rem, 1.7rem + 3.4vw, 4rem);        /* 40 → 64 */
+  --dm-fs-h2: clamp(1.875rem, 1.5rem + 1.6vw, 2.5rem);    /* 30 → 40 */
+  --dm-fs-h3: clamp(1.375rem, 1.25rem + .5vw, 1.625rem);  /* 22 → 26 */
+  --dm-fs-h4: .9375rem;                                    /* 15 */
+  --dm-fs-lead: clamp(1.125rem, 1.05rem + .3vw, 1.25rem); /* 18 → 20 */
+  --dm-fs-body: clamp(1rem, .97rem + .15vw, 1.0625rem);   /* 16 → 17 */
+  --dm-fs-small: .9375rem;                                 /* 15 */
+  --dm-fs-caption: .8125rem;                               /* 13 */
+  --dm-fs-button: .875rem;                                 /* 14 */
+  --dm-lh-tight: 1.05; --dm-lh-title: 1.2; --dm-lh-body: 1.65;
+  --dm-ls-display: .06em; --dm-ls-label: .18em; --dm-ls-button: .14em; --dm-ls-logo: .44em;
+
+  /* Espacements (base 4) */
+  --dm-space-1: 4px;  --dm-space-2: 8px;  --dm-space-3: 12px; --dm-space-4: 16px;
+  --dm-space-5: 24px; --dm-space-6: 32px; --dm-space-7: 48px; --dm-space-8: 64px;
+  --dm-space-9: 96px; --dm-space-10: 128px;
+  --dm-gutter: clamp(20px, 5vw, 64px);
+  --dm-container: 1200px;
+
+  /* Arrondis */
+  --dm-radius-xs: 6px;   /* cadres de dessins */
+  --dm-radius-sm: 10px;  /* champs */
+  --dm-radius-md: 16px;  /* cartes */
+  --dm-radius-lg: 24px;  /* blocs mis en avant */
+  --dm-radius-pill: 999px;
+
+  /* Ombres */
+  --dm-shadow-card: 0 12px 32px -8px rgba(13, 10, 31, .6);
+  --dm-shadow-pop: 0 24px 60px -12px rgba(13, 10, 31, .8);
+  --dm-shadow-paper: 0 2px 0 rgba(0, 0, 0, .08), 0 16px 30px -10px rgba(0, 0, 0, .6);
+  --dm-glow-gold: 0 10px 30px -6px rgba(255, 182, 39, .55);
+  --dm-focus-ring: 0 0 0 3px var(--dm-night), 0 0 0 5px var(--dm-gold-light);
+
+  /* Mouvement */
+  --dm-ease: cubic-bezier(.2, .8, .2, 1);
+  --dm-dur-fast: 120ms; --dm-dur: 220ms; --dm-dur-slow: 480ms;
+
+  /* Compléments maquette (valeurs issues de « Site Double M », validées) */
+  --dm-paper: #FBF8F0;                       /* cadre papier des dessins */
+  --dm-error-text: #FF8a94;                  /* texte des messages d'erreur */
+  --dm-cat-dessin-outline: #b3a6ff;          /* texte du filtre Dessin non sélectionné */
+  --dm-disabled-bg: #3a3166;                 /* bouton inactif */
+  --dm-field-disabled: #221a4b;              /* champ inactif (numéro automatique) */
+  --dm-overlay: rgba(7, 5, 26, .94);         /* fond de la visionneuse */
+  --dm-tape-gold: rgba(255, 224, 122, .82);  /* scotch or */
+  --dm-tape-coral: rgba(255, 90, 78, .78);   /* scotch corail */
+  --dm-tape-lavender: rgba(143, 124, 255, .82); /* scotch lavande */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dm-dur-fast: 0ms; --dm-dur: 0ms; --dm-dur-slow: 0ms; }
+}

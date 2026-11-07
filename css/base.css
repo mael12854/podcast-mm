@@ -1,0 +1,204 @@
+/* Double M — base : reset, typo, liens, focus, boutons, badges, ondes.
+   Toutes les couleurs viennent de tokens.css (les transparences via color-mix). */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: 88px;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--dm-night);
+  color: var(--dm-text);
+  font-family: var(--dm-font);
+  font-size: var(--dm-fs-body);
+  line-height: var(--dm-lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+main { flex: 1; display: block; min-width: 0; width: 100%; }
+
+img, svg { display: block; max-width: 100%; }
+
+h1, h2, h3, h4, p, figure { margin: 0; }
+
+a { color: var(--dm-gold-light); text-decoration: underline; text-underline-offset: 3px; }
+a:hover { color: var(--dm-gold); }
+
+::selection { background: var(--dm-gold); color: var(--dm-night); }
+
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+input::placeholder, textarea::placeholder { color: var(--dm-text-faint); opacity: 1; }
+
+:focus { outline: none; }
+:focus-visible { outline: none; box-shadow: var(--dm-focus-ring); border-radius: 4px; }
+.btn:focus-visible, .chip:focus-visible, .badge:focus-visible { border-radius: var(--dm-radius-pill); }
+
+.sr-only {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.skip-link {
+  position: absolute; left: var(--dm-space-4); top: -100px; z-index: 100;
+  padding: var(--dm-space-3) var(--dm-space-4); border-radius: var(--dm-radius-sm);
+  background: var(--dm-grad-gold); color: var(--dm-night); font-weight: 700; text-decoration: none;
+}
+.skip-link:focus { top: var(--dm-space-3); }
+
+/* ---------- Gabarit ---------- */
+.container {
+  width: 100%;
+  max-width: calc(var(--dm-container) + 2 * var(--dm-gutter));
+  margin: 0 auto;
+  padding-left: var(--dm-gutter);
+  padding-right: var(--dm-gutter);
+}
+.container--wide { max-width: calc(var(--dm-container) + 128px + 2 * var(--dm-gutter)); }
+
+/* ---------- Typographie ---------- */
+.h1 { font-size: var(--dm-fs-h1); font-weight: 700; letter-spacing: var(--dm-ls-display); line-height: var(--dm-lh-tight); text-transform: uppercase; }
+.h2 { font-size: clamp(26px, 3.2vw, 40px); font-weight: 700; letter-spacing: var(--dm-ls-display); line-height: 1.1; text-transform: uppercase; }
+.kicker { font-weight: 700; font-size: var(--dm-fs-h4); letter-spacing: var(--dm-ls-label); line-height: 1.3; color: var(--dm-gold-light); text-transform: uppercase; }
+.kicker--coral { color: var(--dm-coral); }
+.lead { font-size: clamp(17px, 1.7vw, 20px); line-height: 1.6; color: var(--dm-text-muted); text-wrap: pretty; }
+.meta { font-size: var(--dm-fs-caption); font-weight: 500; color: var(--dm-text-faint); }
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+
+/* ---------- Boutons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--dm-space-3);
+  min-height: 44px; padding: 0 24px; border-radius: var(--dm-radius-pill);
+  font-family: var(--dm-font); font-weight: 700; font-size: var(--dm-fs-button); letter-spacing: var(--dm-ls-button);
+  line-height: 1; text-transform: uppercase; text-decoration: none; white-space: nowrap;
+  border: 2px solid transparent; background: none; color: var(--dm-white);
+  transition: transform var(--dm-dur) var(--dm-ease), box-shadow var(--dm-dur) var(--dm-ease), background var(--dm-dur) var(--dm-ease), border-color var(--dm-dur) var(--dm-ease), color var(--dm-dur) var(--dm-ease);
+}
+.btn--lg { height: 52px; }
+.btn--md { height: 48px; padding: 0 22px; font-size: 13px; }
+
+.btn--gold {
+  border: none; color: var(--dm-night);
+  background: var(--dm-grad-gold);
+  box-shadow: var(--dm-glow-gold);
+}
+.btn--gold:hover {
+  color: var(--dm-night);
+  /* survol défini par les guidelines : #FFF0B8 → #FFC94F */
+  background: linear-gradient(180deg, #FFF0B8, #FFC94F);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px -6px color-mix(in srgb, var(--dm-gold) 70%, transparent);
+}
+.btn--gold:disabled, .btn--gold[aria-disabled="true"] {
+  background: var(--dm-disabled-bg); color: var(--dm-text-muted); box-shadow: none; transform: none; cursor: not-allowed;
+}
+
+.btn--outline { border-color: color-mix(in srgb, var(--dm-white) 85%, transparent); color: var(--dm-white); }
+.btn--outline:hover { color: var(--dm-white); border-color: var(--dm-white); background: color-mix(in srgb, var(--dm-white) 6%, transparent); }
+
+.btn--text { border: none; padding: 0; min-height: 44px; color: var(--dm-gold-light); font-size: 13px; }
+.btn--text:hover { color: var(--dm-gold); }
+
+/* Pastille « lecture » à l'intérieur d'un bouton or */
+.btn--play { padding-left: 10px; }
+.play-dot {
+  flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--dm-night);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.play-dot::before {
+  content: ""; width: 0; height: 0; margin-left: 3px;
+  border-left: 11px solid var(--dm-gold-light); border-top: 7px solid transparent; border-bottom: 7px solid transparent;
+}
+.play-dot--sm { width: 28px; height: 28px; }
+.play-dot--sm::before { margin-left: 2px; border-left-width: 9px; border-top-width: 6px; border-bottom-width: 6px; }
+
+/* ---------- Badges ---------- */
+.badge {
+  display: inline-flex; align-items: center; gap: var(--dm-space-2);
+  height: 28px; padding: 0 12px; border-radius: var(--dm-radius-pill);
+  font-weight: 700; font-size: 12px; letter-spacing: .08em; line-height: 1; text-transform: uppercase; white-space: nowrap;
+}
+.badge--card { height: 26px; padding: 0 11px; font-size: 11px; }
+.badge--list { height: 22px; padding: 0 9px; font-size: 10px; }
+.badge--chronique { background: var(--dm-cat-chronique-bg); color: var(--dm-cat-chronique-fg); }
+.badge--parents { background: var(--dm-cat-parents-bg); color: var(--dm-cat-parents-fg); }
+.badge--dessin { background: var(--dm-cat-dessin-bg); color: var(--dm-cat-dessin-fg); }
+
+.badge--live {
+  gap: 10px; height: auto; padding: 7px 16px; font-size: 12px; letter-spacing: .16em;
+  border: 2px solid color-mix(in srgb, var(--dm-white) 85%, transparent); color: var(--dm-white);
+}
+.live-dot {
+  position: relative; flex: none; width: 9px; height: 9px; border-radius: 50%; background: var(--dm-live);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--dm-live) 25%, transparent);
+}
+.badge--new {
+  height: auto; padding: 4px 12px; font-size: 11px; letter-spacing: .16em;
+  border: 2px solid color-mix(in srgb, var(--dm-white) 85%, transparent); color: var(--dm-white);
+}
+.badge--new::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--dm-gold); }
+
+/* ---------- Ondes radio ---------- */
+.waves { position: absolute; width: 0; height: 0; pointer-events: none; }
+.waves span {
+  position: absolute; border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--dm-lavender) calc(var(--o, .3) * 100%), transparent);
+  width: var(--s); height: var(--s); left: calc(var(--s) / -2); top: calc(var(--s) / -2);
+}
+.waves--thin span { border-width: 1.5px; }
+
+/* Animation légère : les ondes « respirent » à tour de rôle */
+@keyframes dm-wave {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.025); }
+}
+@keyframes dm-live {
+  0%, 100% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--dm-live) 25%, transparent); }
+  50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--dm-live) 8%, transparent); }
+}
+.waves--animated span { animation: dm-wave 6s var(--dm-ease) infinite; }
+.waves--animated span:nth-child(2) { animation-delay: .6s; }
+.waves--animated span:nth-child(3) { animation-delay: 1.2s; }
+.waves--animated span:nth-child(4) { animation-delay: 1.8s; }
+.waves--animated span:nth-child(5) { animation-delay: 2.4s; }
+.badge--live .live-dot { animation: dm-live 2.4s ease-in-out infinite; }
+
+/* ---------- Numéro d'épisode « N° 14 » ---------- */
+.ep-num { display: flex; align-items: baseline; gap: 4px; font-weight: 800; line-height: 1; }
+.ep-num__n { color: var(--dm-coral); }
+.ep-num__v {
+  letter-spacing: -.02em; color: var(--dm-gold);
+  background-image: var(--dm-grad-gold); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+/* ---------- Cadre papier des dessins ---------- */
+.paper {
+  position: relative; background: var(--dm-paper); padding: 10px; border-radius: var(--dm-radius-xs);
+  box-shadow: var(--dm-shadow-paper);
+}
+.paper__img { width: 100%; height: 100%; object-fit: cover; border-radius: 2px; background: var(--dm-paper); }
+.paper__hatch {
+  width: 100%; height: 100%; border-radius: 2px;
+  background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--dm-night) 8%, transparent) 0 6px, transparent 6px 12px);
+}
+.tape { position: absolute; left: 50%; top: -10px; width: 68px; height: 22px; margin-left: -34px; transform: rotate(-4deg); }
+.tape--gold { background: var(--dm-tape-gold); }
+.tape--coral { background: var(--dm-tape-coral); }
+.tape--lavender { background: var(--dm-tape-lavender); }
+
+/* ---------- Mouvement réduit : on coupe tout ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

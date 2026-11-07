@@ -1,0 +1,73 @@
+[
+  {
+    "id": "exemple-le-dragon-qui-avait-peur-du-noir",
+    "numero": 3,
+    "titre": "Le dragon qui avait peur du noir",
+    "date": "2026-10-30",
+    "categorie": "dessin",
+    "description": "Il était une fois un dragon qui crachait du feu… mais seulement quand il faisait jour. La nuit, il n'osait plus sortir de sa grotte.\n\nMaël raconte, Marin dessine. Six dessins à regarder pendant l'écoute, chacun au bon moment. Lance l'épisode et garde la page ouverte.\n\nÉpisode d'exemple : ce contenu est factice. Remplace-le ou supprime-le depuis l'espace admin.",
+    "spotifyUrl": "https://open.spotify.com/episode/4dRgQ7kXbN2pLmV8sT1aZc",
+    "duree": "18 min",
+    "auteurs": "Maël & Marin",
+    "dessins": [
+      {
+        "src": "images/dessins/exemple-le-dragon-qui-avait-peur-du-noir/01.jpg",
+        "legende": "Le dragon dans sa grotte",
+        "minutage": "01:05",
+        "auteur": "Marin"
+      },
+      {
+        "src": "images/dessins/exemple-le-dragon-qui-avait-peur-du-noir/02.jpg",
+        "legende": "La lampe de poche",
+        "minutage": "03:20",
+        "auteur": "Marin"
+      },
+      {
+        "src": "images/dessins/exemple-le-dragon-qui-avait-peur-du-noir/03.jpg",
+        "legende": "La grotte la nuit",
+        "minutage": "06:40",
+        "auteur": "Maël"
+      },
+      {
+        "src": "images/dessins/exemple-le-dragon-qui-avait-peur-du-noir/04.jpg",
+        "legende": "Le hibou gardien",
+        "minutage": "09:15",
+        "auteur": "Marin"
+      },
+      {
+        "src": "images/dessins/exemple-le-dragon-qui-avait-peur-du-noir/05.jpg",
+        "legende": "La première sortie",
+        "minutage": "12:30",
+        "auteur": "Maël"
+      },
+      {
+        "src": "images/dessins/exemple-le-dragon-qui-avait-peur-du-noir/06.jpg",
+        "legende": "Le dragon et les étoiles",
+        "minutage": "16:02",
+        "auteur": "Marin"
+      }
+    ]
+  },
+  {
+    "id": "exemple-papa-la-2cv-et-le-col-du-galibier",
+    "numero": 2,
+    "titre": "Papa, la 2CV et le col du Galibier",
+    "date": "2026-10-16",
+    "categorie": "parents",
+    "description": "En 1994, Renaud a 22 ans, une 2CV orange et une idée fixe : passer le col du Galibier. 2 642 mètres plus haut, le moteur a un autre avis.\n\nDans sa chronique, papa raconte la montée, la panne, et l'inconnu qui s'est arrêté avec une bouteille d'eau et une clé de 10. Maël et Marin posent les questions que tout le monde se pose.\n\nÉpisode d'exemple : ce contenu est factice. Remplace-le ou supprime-le depuis l'espace admin.",
+    "spotifyUrl": "https://open.spotify.com/episode/7hYw2cQeLr9VnB3xP0kDfs",
+    "duree": "12 min",
+    "auteurs": "Renaud (papa)"
+  },
+  {
+    "id": "exemple-on-a-construit-une-cabane-presque-etanche",
+    "numero": 1,
+    "titre": "On a construit une cabane (presque) étanche",
+    "date": "2026-10-02",
+    "categorie": "chronique",
+    "description": "Trois planches, une bâche bleue et beaucoup trop de confiance. Maël et Marin racontent la construction de leur cabane au fond du jardin, jusqu'à la première averse.\n\nAu programme : le plan dessiné sur un carton, la bataille pour le choix du nom, et le test d'étanchéité que personne n'avait prévu.\n\nÉpisode d'exemple : ce contenu est factice. Remplace-le ou supprime-le depuis l'espace admin.",
+    "spotifyUrl": "https://open.spotify.com/episode/2mKs8TfUa1QbZr6yWn4HcE",
+    "duree": "21 min",
+    "auteurs": "Maël & Marin"
+  }
+]

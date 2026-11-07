@@ -1,0 +1,7 @@
+{
+  "name": "double-m",
+  "private": true,
+  "description": "Site de Double M, la radio de La Compagnie M&M",
+  "type": "module",
+  "engines": { "node": "22.x" }
+}

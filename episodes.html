@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les épisodes · Double M</title>
+<meta name="description" content="Toutes les émissions de Double M : chroniques, chroniques des parents et dessins radio-dessinés.">
+<meta name="theme-color" content="#1d1642">
+<link rel="icon" href="/images/logo/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/images/logo/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Double M">
+<meta property="og:title" content="Les épisodes · Double M">
+<meta property="og:description" content="Toutes les émissions de Double M : chroniques, chroniques des parents et dessins radio-dessinés.">
+<meta property="og:image" content="/images/logo/pochette.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/components.css">
+<link rel="stylesheet" href="/css/pages.css">
+</head>
+<body>
+<a class="skip-link" href="#contenu">Aller au contenu</a>
+<header class="site-header">
+  <div class="site-header__bar">
+    <a class="brand" href="/" aria-label="Double M, accueil">
+      <img src="/images/logo/double-m-compact.svg" alt="" width="41" height="29">
+      <span aria-hidden="true">DOUBLE M</span>
+    </a>
+    <nav class="site-nav" aria-label="Navigation principale">
+      <ul>
+        <li><a href="/">ACCUEIL</a></li>
+        <li><a href="/episodes" aria-current="page">ÉPISODES</a></li>
+        <li><a href="/qui-sommes-nous">QUI SOMMES-NOUS</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn--gold header-listen" href="https://open.spotify.com/show/4AzeojO18Sh7Ft80TGsn9e" target="_blank" rel="noopener"><span class="play-dot play-dot--sm" aria-hidden="true"></span>ÉCOUTER<span class="sr-only"> Double M sur Spotify (nouvel onglet)</span></a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Ouvrir le menu"><span></span><span></span><span></span></button>
+  </div>
+  <nav id="mobile-menu" class="mobile-menu" aria-label="Navigation principale" hidden>
+    <a class="mobile-menu__link" href="/">ACCUEIL</a>
+    <a class="mobile-menu__link" href="/episodes" aria-current="page">ÉPISODES</a>
+    <a class="mobile-menu__link" href="/qui-sommes-nous">QUI SOMMES-NOUS</a>
+    <a class="btn btn--gold" href="https://open.spotify.com/show/4AzeojO18Sh7Ft80TGsn9e" target="_blank" rel="noopener">ÉCOUTER SUR SPOTIFY<span class="sr-only"> (nouvel onglet)</span></a>
+  </nav>
+</header>
+<main id="contenu">
+  <section class="page-hero">
+    <div class="waves waves--animated" aria-hidden="true"><span style="--s:200px;--o:0.35"></span><span style="--s:380px;--o:0.2"></span><span style="--s:580px;--o:0.1"></span></div>
+    <div class="container page-hero__inner">
+      <h1 class="h1">LES ÉPISODES</h1>
+      <p class="lead">Toutes les émissions, de la plus récente à la plus ancienne. Choisis une catégorie pour trier.</p>
+    </div>
+  </section>
+  <section class="container container--wide episodes-list">
+    <div class="filters" role="tablist" aria-label="Filtrer par catégorie" id="filters"></div>
+    <div id="episodes-panel" role="tabpanel" aria-live="polite">
+      <p class="loading-note">Chargement des épisodes…</p>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <div class="site-footer__cols">
+      <div class="site-footer__brand">
+        <img src="/images/logo/double-m.svg" alt="Double M" width="97" height="84">
+        <p>La radio de Maël et Marin. Une émission de La Compagnie M&amp;M.</p>
+      </div>
+      <nav class="site-footer__col" aria-label="Pied de page">
+        <span class="site-footer__label">NAVIGUER</span>
+        <ul>
+          <li><a class="plain" href="/">Accueil</a></li>
+          <li><a class="plain" href="/episodes">Épisodes</a></li>
+          <li><a class="plain" href="/qui-sommes-nous">Qui sommes-nous</a></li>
+        </ul>
+      </nav>
+      <div class="site-footer__col" style="gap:10px">
+        <span class="site-footer__label">ÉCOUTER</span>
+        <a class="spotify" href="https://open.spotify.com/show/4AzeojO18Sh7Ft80TGsn9e" target="_blank" rel="noopener">Double M sur Spotify ↗<span class="sr-only"> (nouvel onglet)</span></a>
+      </div>
+    </div>
+    <div class="site-footer__bottom">
+      <span class="sig">LA COMPAGNIE M&amp;M</span>
+      <span>© 2026 · <a href="/admin" rel="nofollow">Espace admin</a></span>
+    </div>
+  </div>
+</footer>
+<script type="module" src="/js/site.js"></script>
+<script type="module" src="/js/episodes.js"></script>
+</body>
+</html>

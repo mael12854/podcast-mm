@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Espace admin · Double M</title>
+<meta name="theme-color" content="#1d1642">
+<link rel="icon" href="/images/logo/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/css/tokens.css">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/components.css">
+<link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="admin">
+
+<!-- 06 Connexion -->
+<section class="login" id="view-login" hidden>
+  <div class="waves" aria-hidden="true"><span style="--s:360px;--o:.3"></span><span style="--s:640px;--o:.16"></span><span style="--s:960px;--o:.08"></span></div>
+  <form class="login__card" id="login-form" novalidate>
+    <div class="login__head">
+      <img src="/images/logo/double-m.svg" alt="Double M" width="127" height="111">
+      <h1>ESPACE ADMIN</h1>
+      <p>Réservé à l'équipe Double M.</p>
+    </div>
+    <div class="field">
+      <label class="field__label" for="pwd">Mot de passe</label>
+      <div class="input-wrap">
+        <input class="input" id="pwd" name="password" type="password" autocomplete="current-password" aria-describedby="pwd-err" required>
+        <button class="reveal" type="button" id="pwd-toggle" aria-controls="pwd" aria-pressed="false">Afficher</button>
+      </div>
+      <p class="err" id="pwd-err" role="alert" hidden></p>
+    </div>
+    <button class="btn btn--gold btn--lg" type="submit" id="login-btn">SE CONNECTER</button>
+    <a class="login__back" href="/">← RETOUR AU SITE</a>
+  </form>
+</section>
+
+<!-- Header admin -->
+<header class="admin-header" id="admin-header" hidden>
+  <button class="admin-brand" type="button" data-go="list" aria-label="Double M admin, liste des épisodes">
+    <img src="/images/logo/double-m-compact.svg" alt="" width="34" height="24"><span aria-hidden="true">ADMIN</span>
+  </button>
+  <div class="admin-header__actions">
+    <a class="link-btn" href="/" target="_blank" rel="noopener">Voir le site</a>
+    <button class="pill-btn" type="button" id="logout-btn">Déconnexion</button>
+  </div>
+</header>
+
+<main id="admin-main">
+  <!-- 07 Liste -->
+  <section class="admin-main" id="view-list" hidden aria-labelledby="list-title">
+    <div class="list-head">
+      <div><h1 class="admin-title" id="list-title" tabindex="-1">ÉPISODES</h1><span class="list-head__count" id="list-count"></span></div>
+      <button class="btn btn--gold new-btn" type="button" data-go="new"><span class="plus" aria-hidden="true">+</span>NOUVEL ÉPISODE</button>
+    </div>
+    <div id="list-notice" aria-live="polite"></div>
+    <ul class="rows" id="rows"></ul>
+  </section>
+
+  <!-- 08 / 09 / 11 Formulaire -->
+  <section class="admin-main" id="view-form" hidden aria-labelledby="form-title" style="padding-top:24px;padding-bottom:0">
+    <button class="back-btn" type="button" data-go="list">← ÉPISODES</button>
+    <h1 class="admin-title" id="form-title" tabindex="-1" style="margin-top:-8px">NOUVEL ÉPISODE</h1>
+
+    <div class="loading-banner" id="form-loading" role="status" hidden>
+      <span class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <div><strong>Publication en cours…</strong><span id="loading-msg">Ça prend quelques secondes.</span></div>
+    </div>
+    <div class="notice notice--err" id="form-error" role="alert" tabindex="-1" hidden>
+      <span class="notice__icon" aria-hidden="true">!</span>
+      <div class="notice__text"><strong>Oups, ça n'a pas marché.</strong><span id="form-error-msg"></span></div>
+    </div>
+
+    <form class="form" id="ep-form" novalidate>
+      <div class="field">
+        <label class="field__label" for="f-titre">Titre de l'épisode</label>
+        <input class="input" id="f-titre" name="titre" maxlength="120" placeholder="Ex. : On a construit une cabane (presque) étanche" aria-describedby="e-titre">
+        <p class="err" id="e-titre" hidden></p>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label class="field__label" for="f-date">Date de diffusion</label>
+          <input class="input" id="f-date" name="date" type="date" aria-describedby="e-date">
+          <p class="err" id="e-date" hidden></p>
+        </div>
+        <div class="field field--muted">
+          <span class="field__label" id="l-num">Numéro</span>
+          <span class="static-field" aria-labelledby="l-num" id="f-num">— (automatique)</span>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label class="field__label" for="f-duree">Durée <span class="opt">facultatif</span></label>
+          <input class="input" id="f-duree" name="duree" maxlength="20" placeholder="Ex. : 18 min">
+        </div>
+        <div class="field">
+          <label class="field__label" for="f-auteurs">Qui parle <span class="opt">facultatif</span></label>
+          <input class="input" id="f-auteurs" name="auteurs" maxlength="80" placeholder="Ex. : Maël & Marin">
+        </div>
+      </div>
+      <fieldset class="field" aria-describedby="e-categorie">
+        <legend class="field__label">Catégorie</legend>
+        <div class="cats" role="radiogroup">
+          <label class="cat-opt cat-opt--chronique"><input type="radio" name="categorie" value="chronique"><span>Chronique</span></label>
+          <label class="cat-opt cat-opt--parents"><input type="radio" name="categorie" value="parents"><span>Chronique des parents</span></label>
+          <label class="cat-opt cat-opt--dessin"><input type="radio" name="categorie" value="dessin"><span>Dessin radio-dessiné</span></label>
+        </div>
+        <p class="err" id="e-categorie" hidden></p>
+      </fieldset>
+      <div class="field">
+        <label class="field__label" for="f-desc">Description <span class="field__count" id="desc-count" aria-hidden="true">0 / 600</span></label>
+        <textarea class="input" id="f-desc" name="description" rows="6" maxlength="600" placeholder="Raconte le début de l'histoire. Un détail concret vaut trois adjectifs." aria-describedby="desc-help e-description"></textarea>
+        <p class="field__help" id="desc-help">Une ligne vide = un nouveau paragraphe. La première phrase sert de résumé sur les cartes.</p>
+        <p class="err" id="e-description" hidden></p>
+      </div>
+      <div class="field">
+        <label class="field__label" for="f-spotify">Lien Spotify de l'épisode</label>
+        <input class="input" id="f-spotify" name="spotifyUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://open.spotify.com/episode/…" aria-describedby="spotify-help e-spotifyUrl">
+        <p class="field__help" id="spotify-help">Dans Spotify : ⋯ › Partager › Copier le lien de l'épisode.</p>
+        <p class="err" id="e-spotifyUrl" hidden></p>
+      </div>
+
+      <div class="field" id="drawings-field" hidden>
+        <span class="field__label" id="l-dessins">Dessins <span class="field__count" id="draw-count">0 / 12</span></span>
+        <label class="drop" id="drop">
+          <input type="file" id="f-files" accept="image/jpeg,image/png" multiple aria-describedby="drop-help e-dessins">
+          <span class="drop__plus" aria-hidden="true">+</span>
+          <strong>Ajoute les dessins</strong>
+          <span id="drop-help">Glisse-les ici ou <span class="fake-link">choisis des fichiers</span><br>JPG ou PNG · 10 Mo max · 12 dessins max</span>
+        </label>
+        <p class="err" id="e-dessins" hidden></p>
+        <ol class="drawings" id="drawings" aria-labelledby="l-dessins"></ol>
+        <p class="field__help">Glisse une vignette (ou utilise ↑ ↓) pour changer l'ordre. La légende décrit le dessin à ceux qui ne le voient pas.</p>
+      </div>
+
+      <div class="actions-bar">
+        <button class="btn btn--outline" type="button" data-go="list">ANNULER</button>
+        <button class="btn btn--gold" type="submit" id="publish-btn">PUBLIER</button>
+      </div>
+    </form>
+    <div style="height:40px"></div>
+  </section>
+
+  <!-- 10 Publié -->
+  <section class="done" id="view-done" hidden>
+    <div class="done__card" role="status">
+      <div class="waves" aria-hidden="true"><span style="--s:120px;--o:.35"></span><span style="--s:220px;--o:.2"></span><span style="--s:340px;--o:.1"></span></div>
+      <span class="done__check" aria-hidden="true">✓</span>
+      <h1 id="done-title" tabindex="-1">Publié !</h1>
+      <p id="done-text"></p>
+      <p class="done__live" id="done-live"></p>
+      <div class="done__recap" id="done-recap"></div>
+    </div>
+    <a class="btn btn--gold btn--lg" id="done-view" href="/" target="_blank" rel="noopener">VOIR L'ÉPISODE</a>
+    <div class="done__more">
+      <button class="btn btn--outline" type="button" data-go="list">RETOUR À LA LISTE</button>
+      <button class="btn btn--text" type="button" data-go="new">+ UN AUTRE ÉPISODE</button>
+    </div>
+  </section>
+</main>
+
+<script type="module" src="/js/admin.js"></script>
+</body>
+</html>
