@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "episode-001-presentation",
+    "numero": 1,
+    "titre": "Épisode #001 - Présentation",
+    "date": "2026-11-07",
+    "categorie": "chronique",
+    "description": "Le site de Ti Maël : https://ti-mael.vercel.app/\nLe site de Poké Ma-Ma : https://poke-mamma.vercel.app/\nMerci de votre écoute !",
+    "spotifyUrl": "https://open.spotify.com/episode/6mx1nwrlKz5ECdsDHUyRvk",
+    "duree": "3 minutes 57",
+    "auteurs": "Maël & Marin"
+  }
+]
