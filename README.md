@@ -132,8 +132,6 @@ vercel.json, robots.txt
 - Pour chaque dessin, `src` et `legende` sont obligatoires ; `minutage` et `auteur` sont facultatifs. L'ordre de la galerie suit l'ordre de la liste, et l'orientation se lit sur l'image.
 - L'épisode n° 1 porte la bande « 1ER ÉPISODE », le plus récent la bande « NOUVEL ÉPISODE ».
 
-Les trois épisodes fournis au départ sont des **exemples factices** (id en `exemple-…`) : supprime-les depuis l'admin quand les vrais épisodes sont en ligne.
-
 ### Tester en local
 
 Les pages publiques marchent avec n'importe quel serveur statique, par exemple `npx serve .` à la racine. Pour l'admin et `api/`, utilise `npx vercel dev`, avec les mêmes variables d'environnement dans un fichier `.env` qui ne doit jamais être commité.
