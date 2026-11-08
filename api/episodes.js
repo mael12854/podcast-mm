@@ -7,6 +7,7 @@
 import crypto from 'node:crypto';
 import { handler, requireSession, readBody, send, HttpError } from './_lib/auth.js';
 import { readEpisodes, readJsonList, commitWithRetry, serialize, DATA_PATH, AVIS_PATH } from './_lib/github.js';
+import { readAttente, ATTENTE_PATH } from './_lib/avis-store.js';
 
 const CATS = ['chronique', 'parents', 'dessin'];
 const SPOTIFY_RE = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?episode\/[A-Za-z0-9]+/;
@@ -148,6 +149,9 @@ async function run(req, res) {
     const files = { [DATA_PATH]: serialize(list.filter((e) => e.id !== id)) };
     const avis = await readJsonList(AVIS_PATH, base, "d'avis");
     if (avis.list.some((a) => a.episodeId === id)) files[AVIS_PATH] = serialize(avis.list.filter((a) => a.episodeId !== id));
+    const attente = await readAttente(base);
+    const gone = new Set(attente.list.filter((a) => a.episodeId === id).map((a) => a.id));
+    if (gone.size) files[ATTENTE_PATH] = serialize(attente.raw.filter((e) => !gone.has(e.id)));
     return { files, remove: drawingPaths(old), message: `Suppression épisode : ${old.titre}`, result: old };
   });
   return send(res, 200, { deleted: result.id, titre: result.titre });

@@ -1,4 +1,5 @@
-// Avis des auditeurs sur la page épisode : liste, moyenne et formulaire (publication immédiate).
+// Avis des auditeurs sur la page épisode : liste des avis validés, moyenne et formulaire.
+// Un avis envoyé part en modération : il n'apparaît qu'après validation dans l'admin.
 import { esc, fmtDate } from './site.js';
 
 const SHOW_FIRST = 5;
@@ -21,7 +22,6 @@ function reviewItem(a, isNew = false) {
 export function initReviews(section, ep) {
   let data = { avis: [], total: 0, moyenne: null };
   let showAll = false;
-  let newId = null;
   const shownAt = Date.now();
 
   section.innerHTML = `
@@ -35,7 +35,7 @@ export function initReviews(section, ep) {
       </div>
       <form class="review-form" id="review-form" novalidate aria-labelledby="review-form-title">
         <h3 id="review-form-title">Donne ton avis</h3>
-        <p>Ton avis est publié tout de suite sous l'épisode. Pas de lien, et reste sympa : Maël et Marin le liront.</p>
+        <p>Ton avis sera publié après validation par Maël et Marin.</p>
         <div class="field">
           <label class="field__label" for="r-prenom">Ton prénom</label>
           <input class="input" id="r-prenom" name="prenom" maxlength="30" autocomplete="given-name" placeholder="Ex. : Léa" aria-describedby="re-prenom">
@@ -57,7 +57,7 @@ export function initReviews(section, ep) {
           <label for="r-site">Ne pas remplir</label>
           <input id="r-site" name="site" tabindex="-1" autocomplete="off">
         </div>
-        <button class="btn btn--outline" type="submit" id="r-submit">PUBLIER MON AVIS</button>
+        <button class="btn btn--outline" type="submit" id="r-submit">ENVOYER MON AVIS</button>
         <p class="review-form__status" id="r-status" role="status" tabindex="-1"></p>
       </form>
     </div>`;
@@ -73,11 +73,11 @@ export function initReviews(section, ep) {
       ? `${stars(data.moyenne)}<strong>${String(data.moyenne).replace('.', ',')}</strong><span>/ 5 · ${data.total} avis</span>`
       : '';
     if (!data.total) {
-      list.innerHTML = '<li class="empty">Pas encore d\'avis sur cet épisode. Sois le premier à donner le tien !</li>';
+      list.innerHTML = '<li class="empty">Pas encore d\'avis publié sur cet épisode. Sois le premier à donner le tien !</li>';
       return;
     }
     const shown = showAll ? data.avis : data.avis.slice(0, SHOW_FIRST);
-    list.innerHTML = shown.map((a) => reviewItem(a, a.id === newId)).join('')
+    list.innerHTML = shown.map((a) => reviewItem(a)).join('')
       + (data.total > shown.length ? `<li><button class="btn btn--text reviews__more" type="button" id="r-more">VOIR LES ${data.total} AVIS →</button></li>` : '');
     section.querySelector('#r-more')?.addEventListener('click', () => { showAll = true; render(); });
   }
@@ -121,7 +121,7 @@ export function initReviews(section, ep) {
     ['prenom', 'note', 'message'].forEach((k) => fieldErr(k, errs[k]));
     if (Object.keys(errs).length) { form.querySelector('[aria-invalid="true"], input[name="note"]')?.focus(); return; }
 
-    btn.disabled = true; btn.textContent = 'PUBLICATION…';
+    btn.disabled = true; btn.textContent = 'ENVOI…';
     try {
       const res = await fetch('/api/avis', {
         method: 'POST',
@@ -132,22 +132,16 @@ export function initReviews(section, ep) {
       try { body = await res.json(); } catch { /* vide */ }
       if (!res.ok) {
         if (body.fields) { Object.entries(body.fields).forEach(([k, v]) => fieldErr(k, v)); return; }
-        throw new Error(body.error || 'Ton avis n\'a pas pu être publié. Réessaie dans un instant.');
-      }
-      if (body.total) {
-        data = { avis: body.avis, total: body.total, moyenne: body.moyenne };
-        newId = body.avis.find((a) => a.prenom === payload.prenom && a.message === payload.message)?.id || null;
-        showAll = false;
-        render();
+        throw new Error(body.error || 'Ton avis n\'a pas pu être envoyé. Réessaie dans un instant.');
       }
       form.reset(); paintStars();
       section.querySelector('#r-count').textContent = '0 / 300';
-      status.textContent = 'Merci ! Ton avis est publié.';
+      status.textContent = 'Merci ! Ton avis a bien été envoyé, il apparaîtra après validation.';
       status.focus();
     } catch (err) {
       status.innerHTML = `<span class="err">${esc(err.message === 'Failed to fetch' ? 'La connexion a coupé. Vérifie ton réseau et réessaie.' : err.message)}</span>`;
     } finally {
-      btn.disabled = false; btn.textContent = 'PUBLIER MON AVIS';
+      btn.disabled = false; btn.textContent = 'ENVOYER MON AVIS';
     }
   });
 

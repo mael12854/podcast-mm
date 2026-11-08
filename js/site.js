@@ -43,6 +43,13 @@ export function shortOf(desc) {
   return sentence.length > 180 ? sentence.slice(0, 177).replace(/\s+\S*$/, '') + '…' : sentence;
 }
 
+// Titre d'épisode, avec « Épisode N : » pour les lecteurs d'écran,
+// sauf si le titre commence déjà par « Épisode #00N » (sinon on lirait le numéro deux fois).
+export function titleHtml(ep) {
+  const already = new RegExp(`^\\s*épisode\\s*(n°|no|#)?\\s*0*${Number(ep.numero)}(?!\\d)`, 'i').test(ep.titre || '');
+  return `${already ? '' : `<span class="sr-only">Épisode ${esc(ep.numero)} : </span>`}${esc(ep.titre)}`;
+}
+
 export function metaLine(ep, { withAuthors = true } = {}) {
   return [fmtDate(ep.date), ep.duree, withAuthors ? ep.auteurs : ''].filter(Boolean).join(' · ');
 }
@@ -129,7 +136,7 @@ export function renderCard(ep, { level = 3, latestId = null } = {}) {
   </div>
   <div class="card__body">
     <span class="meta">${esc(metaLine(ep))}</span>
-    <${h} class="card__title"><a href="${episodeUrl(ep)}"><span class="sr-only">Épisode ${esc(ep.numero)} : </span>${esc(ep.titre)}</a></${h}>
+    <${h} class="card__title"><a href="${episodeUrl(ep)}">${titleHtml(ep)}</a></${h}>
     <p class="card__short">${esc(shortOf(ep.description))}</p>
     <span class="card__cta" aria-hidden="true">ÉCOUTER →</span>
   </div>
@@ -142,7 +149,7 @@ export function renderMiniCard(ep) {
   ${ep.pochette ? coverImg(ep, 'num-tile num-tile--cover', 144, '72px') : `<span class="num-tile" aria-hidden="true">${esc(ep.numero)}</span>`}
   <div class="mini-card__body">
     ${catBadge(ep.categorie, 'list')}
-    <h3 class="mini-card__title"><a href="${episodeUrl(ep)}"><span class="sr-only">Épisode ${esc(ep.numero)} : </span>${esc(ep.titre)}</a></h3>
+    <h3 class="mini-card__title"><a href="${episodeUrl(ep)}">${titleHtml(ep)}</a></h3>
     <span class="meta">${esc(metaLine(ep, { withAuthors: false }))}</span>
   </div>
 </article>`;

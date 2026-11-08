@@ -1,0 +1,3 @@
+# Fichiers lus uniquement par les fonctions api/ (via GitHub) : jamais servis par le site.
+data/avis.json
+data/avis-en-attente.json

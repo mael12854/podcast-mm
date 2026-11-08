@@ -261,3 +261,23 @@ body.admin { background: var(--dm-night); }
 .cover-field__pick { position: relative; cursor: pointer; }
 .cover-field__pick input { position: absolute; width: 1px; height: 1px; opacity: 0; }
 .cover-field__pick:focus-within { box-shadow: var(--dm-focus-ring); }
+
+/* ---------- Avis en attente ---------- */
+.pending {
+  display: flex; flex-direction: column; gap: var(--dm-space-3);
+  padding: 16px; border-radius: var(--dm-radius-md); background: var(--dm-surface-1);
+  border: 1.5px solid color-mix(in srgb, var(--dm-gold) 45%, transparent);
+}
+.pending__title { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; letter-spacing: .08em; }
+.pending__count {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 8px;
+  border-radius: var(--dm-radius-pill); background: var(--dm-gold); color: var(--dm-night); font-size: 13px; letter-spacing: 0;
+}
+.pending__count:empty { display: none; }
+.pending__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.pending__empty { font-size: var(--dm-fs-small); color: var(--dm-text-muted); }
+.pending__ep { font-size: var(--dm-fs-caption); color: var(--dm-text-faint); }
+.pending__ep strong { color: var(--dm-text-muted); font-weight: 600; }
+.pending__actions { display: flex; flex-wrap: wrap; gap: var(--dm-space-2); }
+.pill-btn--ok { border-color: color-mix(in srgb, var(--dm-success) 60%, transparent); }
+.pill-btn--ok:hover { border-color: var(--dm-success); }

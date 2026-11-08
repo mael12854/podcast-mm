@@ -17,11 +17,16 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fmtDate = (iso) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); return m ? `${Number(m[3])} ${MONTHS[Number(m[2]) - 1]} ${m[1]}` : ''; };
 const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+// Préfixe lu par les lecteurs d'écran, omis si le titre commence déjà par « Épisode #00X ».
+const numPrefix = (ep) => (new RegExp(`^\\s*épisode\\s*(n°|no|#)?\\s*0*${Number(ep.numero)}(?!\\d)`, 'i').test(ep.titre || '') ? '' : `N° ${ep.numero} : `);
 const badge = (cat, size = 'list') => `<span class="badge badge--${CATS[cat] ? cat : 'chronique'} badge--${size}">${esc((CATS[cat] || CATS.chronique).up)}</span>`;
 
 const state = {
   episodes: [],
   avis: [],
+  pending: [],
+  pendingError: null,
+  confirmPendingId: null,
   openAvisId: null,
   confirmAvisId: null,
   version: null,
@@ -189,14 +194,19 @@ function listNotice(kind, html) {
 async function loadList() {
   $('#rows').innerHTML = '<li class="loading-note">Chargement des épisodes…</li>';
   try {
-    const [data, avis] = await Promise.all([
+    const soft = (e) => { if (e.code === 'session') throw e; return { avis: [], error: e.error }; };
+    const [data, avis, pending] = await Promise.all([
       api('GET', '/api/episodes'),
-      api('GET', '/api/avis?all=1').catch((e) => { if (e.code === 'session') throw e; return { avis: [] }; }),
+      api('GET', '/api/avis?all=1').catch(soft),
+      api('GET', '/api/avis?attente=1').catch(soft),
     ]);
     state.episodes = data.episodes;
     state.version = data.version;
     state.avis = avis.avis || [];
+    state.pending = pending.avis || [];
+    state.pendingError = pending.error || null;
     renderList();
+    renderPending();
   } catch (ex) {
     if (ex.code === 'session') return;
     $('#rows').innerHTML = '';
@@ -204,6 +214,73 @@ async function loadList() {
     $('#retry-list')?.addEventListener('click', () => { listNotice(null); loadList(); });
   }
 }
+
+// ---------- Avis en attente (modération) ----------
+function renderPending() {
+  const list = $('#pending-list');
+  const n = state.pending.length;
+  $('#pending-count').textContent = n ? String(n) : '';
+  if (state.pendingError) { list.innerHTML = `<li class="pending__empty">Impossible de charger les avis en attente : ${esc(state.pendingError)}</li>`; return; }
+  if (!n) { list.innerHTML = '<li class="pending__empty">Aucun avis en attente.</li>'; return; }
+  list.innerHTML = state.pending.map((a) => {
+    const ep = state.episodes.find((e) => e.id === a.episodeId);
+    const confirm = state.confirmPendingId === a.id;
+    const delBtn = `<button class="pill-btn ${confirm ? 'pill-btn--solid-danger' : 'pill-btn--danger'}" type="button" data-pact="del">${confirm ? 'Oui, supprimer' : '🗑️ Supprimer'}${a.prenom ? `<span class="sr-only"> l'avis de ${esc(a.prenom)}</span>` : ''}</button>`;
+    if (a.illisible) {
+      return `<li class="avis-admin__item" data-pending="${esc(a.id)}">
+        <p>Avis illisible (la clé SESSION_SECRET a changé depuis son envoi).</p>
+        <div class="pending__actions">${delBtn}</div>
+      </li>`;
+    }
+    const when = new Date(a.date);
+    const date = `${fmtDate(a.date)} à ${String(when.getHours()).padStart(2, '0')}h${String(when.getMinutes()).padStart(2, '0')}`;
+    return `<li class="avis-admin__item" data-pending="${esc(a.id)}">
+      <div class="avis-admin__top"><strong>${esc(a.prenom)}</strong><span class="avis-admin__stars" role="img" aria-label="${a.note} étoile${a.note > 1 ? 's' : ''} sur 5">${'★'.repeat(a.note)}<span>${'★'.repeat(5 - a.note)}</span></span><span class="meta">${esc(date)}</span></div>
+      <p>${esc(a.message)}</p>
+      <span class="pending__ep">Épisode : <strong>${esc(ep ? ep.titre : 'épisode supprimé')}</strong></span>
+      <div class="pending__actions">
+        <button class="pill-btn pill-btn--ok" type="button" data-pact="pub">✅ Publier<span class="sr-only"> l'avis de ${esc(a.prenom)}</span></button>
+        ${delBtn}
+      </div>
+    </li>`;
+  }).join('');
+}
+
+$('#pending-list').addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-pact]');
+  if (!btn) return;
+  const id = btn.closest('[data-pending]').dataset.pending;
+  const a = state.pending.find((x) => x.id === id);
+  if (btn.dataset.pact === 'del' && state.confirmPendingId !== id) {
+    state.confirmPendingId = id;
+    renderPending();
+    $(`[data-pending="${CSS.escape(id)}"] [data-pact="del"]`)?.focus();
+    return;
+  }
+  $$('#pending-list button').forEach((b) => { b.disabled = true; });
+  btn.textContent = btn.dataset.pact === 'pub' ? 'Publication…' : 'Suppression…';
+  try {
+    if (btn.dataset.pact === 'pub') {
+      await api('PATCH', `/api/avis?id=${encodeURIComponent(id)}`);
+      state.avis = [{ ...a, approuve: true }, ...state.avis];
+      const ep = state.episodes.find((x) => x.id === a.episodeId);
+      listNotice('ok', `L'avis de ${esc(a.prenom)} est publié${ep ? ` sous « ${esc(ep.titre)} »` : ''}. Il apparaît sur le site dans quelques secondes.`);
+    } else {
+      await api('DELETE', `/api/avis?id=${encodeURIComponent(id)}`);
+      listNotice('ok', 'L\'avis en attente a été supprimé.');
+    }
+    state.pending = state.pending.filter((x) => x.id !== id);
+    state.confirmPendingId = null;
+    renderPending();
+    renderList();
+    ($('#pending-list [data-pact]') || $('#list-title')).focus();
+  } catch (ex) {
+    state.confirmPendingId = null;
+    if (ex.code === 'session') return;
+    listNotice('err', `<strong>Ça n'a pas marché.</strong><span>${esc(ex.error)}</span>`);
+    if (ex.code === 'notfound') loadList(); else renderPending();
+  }
+});
 
 function renderList() {
   const n = state.episodes.length;
@@ -222,7 +299,7 @@ function renderList() {
       <div class="row__main">
         <span class="num-tile num-tile--sm" aria-hidden="true">${esc(ep.numero)}</span>
         <div class="row__info">
-          <strong class="row__title"><span class="sr-only">N° ${esc(ep.numero)} : </span>${esc(ep.titre)}</strong>
+          <strong class="row__title">${numPrefix(ep) ? `<span class="sr-only">${esc(numPrefix(ep))}</span>` : ''}${esc(ep.titre)}</strong>
           <div class="row__meta">${badge(ep.categorie)}<span>${esc(fmtDate(ep.date))}</span>${ep.categorie === 'dessin' ? `<span>· ${nDraw} dessin${nDraw > 1 ? 's' : ''}</span>` : ''}${epAvis.length ? `<span>· ${epAvis.length} avis</span>` : ''}</div>
         </div>
       </div>

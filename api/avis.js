@@ -1,13 +1,15 @@
 // /api/avis
-//   GET    ?episode=<id>  (public)  → { avis, total, moyenne } pour un épisode
-//   GET    ?all=1         (admin)   → { avis } : tous les avis
-//   POST   { episodeId, prenom, note, message } (public) → publie l'avis tout de suite
-//   DELETE ?id=<id>       (admin)   → supprime un avis
-// Les avis sont stockés dans data/avis.json (un commit par avis). Ces commits ne redéploient pas
-// le site (voir ignoreCommand dans vercel.json) : les avis sont lus en direct par cette fonction.
+//   GET    ?episode=<id>  (public) → { avis, total, moyenne } : avis VALIDÉS de l'épisode, rien d'autre
+//   POST   { episodeId, prenom, note, message } (public) → enregistre l'avis EN ATTENTE (chiffré), ne renvoie aucun avis
+//   GET    ?attente=1     (admin)  → { avis } : avis en attente, déchiffrés
+//   GET    ?all=1         (admin)  → { avis } : avis publiés
+//   PATCH  ?id=<id>       (admin)  → publie un avis en attente
+//   DELETE ?id=<id>       (admin)  → supprime un avis (en attente ou publié)
+// Chaque action = un commit GitHub. Ces commits ne redéploient pas le site (ignoreCommand dans vercel.json).
 import crypto from 'node:crypto';
 import { handler, requireSession, readBody, send, HttpError, clientIp } from './_lib/auth.js';
 import { headSha, readJsonList, commitWithRetry, serialize, DATA_PATH, AVIS_PATH } from './_lib/github.js';
+import { ATTENTE_PATH, seal, readPublies, readAttente } from './_lib/avis-store.js';
 
 const LINK_RE = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(com|fr|net|org|io|be|ch|ly|gg|xyz)\b)/i;
 
@@ -16,7 +18,7 @@ const recent = new Map();
 function checkRate(ip) {
   const now = Date.now();
   const list = (recent.get(ip) || []).filter((t) => now - t < 10 * 60000);
-  if (list.length >= 3) throw new HttpError(429, 'Tu as déjà donné plusieurs avis. Attends quelques minutes avant d\'en écrire un autre.', 'rate');
+  if (list.length >= 3) throw new HttpError(429, 'Tu as déjà envoyé plusieurs avis. Attends quelques minutes avant d\'en écrire un autre.', 'rate');
   list.push(now);
   recent.set(ip, list);
 }
@@ -50,17 +52,23 @@ function validate(body) {
 }
 
 async function run(req, res) {
+  const id = typeof req.query.id === 'string' ? req.query.id : '';
+
   if (req.method === 'GET') {
+    if (req.query.attente) {
+      requireSession(req);
+      const { list } = await readAttente(await headSha());
+      return send(res, 200, { avis: [...list].sort(byDate) });
+    }
     if (req.query.all) {
       requireSession(req);
-      const { list } = await readJsonList(AVIS_PATH, await headSha(), "d'avis");
+      const { list } = await readPublies(await headSha());
       return send(res, 200, { avis: [...list].sort(byDate) });
     }
     const episodeId = typeof req.query.episode === 'string' ? req.query.episode : '';
     if (!episodeId) throw new HttpError(400, 'Épisode manquant.', 'body');
-    const { list } = await readJsonList(AVIS_PATH, await headSha(), "d'avis");
-    // Petit cache côté Vercel (5 s) pour ménager l'API GitHub ; jamais de cache dans le navigateur,
-    // pour qu'un visiteur voie tout de suite son avis s'il recharge la page.
+    const { list } = await readPublies(await headSha());
+    // Petit cache côté Vercel (5 s) pour ménager l'API GitHub ; jamais de cache dans le navigateur.
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('Vercel-CDN-Cache-Control', 'max-age=5');
     res.setHeader('X-Robots-Tag', 'noindex, nofollow');
@@ -69,35 +77,62 @@ async function run(req, res) {
 
   if (req.method === 'POST') {
     const body = readBody(req);
-    // Piège à robots : un champ caché que les humains ne remplissent pas, et un formulaire envoyé en moins de 3 s.
+    // Piège à robots : champ caché « Ne pas remplir », ou formulaire envoyé en moins de 3 s.
     if (clean(body.site, 200) || (Number(body.t) > 0 && Number(body.t) < 3000)) {
-      return send(res, 200, { ok: true, avis: [], total: 0, moyenne: null });
+      return send(res, 202, { ok: true, enAttente: true });
     }
     const { prenom, note, message } = validate(body);
     const episodeId = typeof body.episodeId === 'string' ? body.episodeId : '';
     checkRate(clientIp(req));
-    const item = { id: crypto.randomBytes(6).toString('hex'), episodeId, prenom, note, message, date: new Date().toISOString() };
-    const result = await commitWithRetry(async (base) => {
+    const avisId = crypto.randomBytes(6).toString('hex');
+    const item = { episodeId, prenom, note, message, date: new Date().toISOString(), approuve: false };
+    await commitWithRetry(async (base) => {
       const eps = await readJsonList(DATA_PATH, base, "d'épisodes");
-      const ep = eps.list.find((e) => e.id === episodeId);
-      if (!ep) throw new HttpError(404, 'Cet épisode n\'existe plus.', 'notfound');
-      const avis = await readJsonList(AVIS_PATH, base, "d'avis");
-      const next = [...avis.list, item];
-      return { files: { [AVIS_PATH]: serialize(next) }, message: `Avis sur « ${ep.titre} » : ${prenom}`, result: summary(next, episodeId) };
+      if (!eps.list.some((e) => e.id === episodeId)) throw new HttpError(404, 'Cet épisode n\'existe plus.', 'notfound');
+      const attente = await readJsonList(ATTENTE_PATH, base, "d'avis en attente");
+      // Message de commit neutre : le repo est public, rien de l'avis ne doit y apparaître en clair.
+      return { files: { [ATTENTE_PATH]: serialize([...attente.list, { id: avisId, enc: seal(item) }]) }, message: 'Nouvel avis en attente de validation', result: true };
     });
-    return send(res, 201, { ok: true, ...result });
+    return send(res, 202, { ok: true, enAttente: true });
   }
 
-  // DELETE (admin)
+  // Tout ce qui suit est réservé à l'admin : la session est vérifiée ici, côté serveur.
   requireSession(req);
-  const id = typeof req.query.id === 'string' ? req.query.id : '';
+
+  if (req.method === 'PATCH') {
+    const published = await commitWithRetry(async (base) => {
+      const attente = await readAttente(base);
+      const a = attente.list.find((x) => x.id === id);
+      if (!a) throw new HttpError(404, 'Cet avis n\'est plus en attente (déjà publié ou supprimé). Recharge la liste.', 'notfound');
+      if (a.illisible) throw new HttpError(409, 'Cet avis est illisible (la clé SESSION_SECRET a changé). Supprime-le.', 'illisible');
+      const eps = await readJsonList(DATA_PATH, base, "d'épisodes");
+      const ep = eps.list.find((e) => e.id === a.episodeId);
+      const pub = await readPublies(base);
+      const avis = { id: a.id, episodeId: a.episodeId, prenom: a.prenom, note: a.note, message: a.message, date: a.date, approuve: true };
+      return {
+        files: {
+          [AVIS_PATH]: serialize([...pub.raw, avis]),
+          [ATTENTE_PATH]: serialize(attente.raw.filter((x) => x.id !== id)),
+        },
+        message: `Avis publié sur « ${ep ? ep.titre : a.episodeId} » : ${a.prenom}`,
+        result: avis,
+      };
+    });
+    return send(res, 200, { publie: published.id });
+  }
+
+  // DELETE : avis en attente ou déjà publié
   const removed = await commitWithRetry(async (base) => {
-    const avis = await readJsonList(AVIS_PATH, base, "d'avis");
-    const a = avis.list.find((x) => x.id === id);
+    const attente = await readJsonList(ATTENTE_PATH, base, "d'avis en attente");
+    if (attente.list.some((x) => x.id === id)) {
+      return { files: { [ATTENTE_PATH]: serialize(attente.list.filter((x) => x.id !== id)) }, message: 'Avis en attente supprimé', result: id };
+    }
+    const pub = await readJsonList(AVIS_PATH, base, "d'avis");
+    const a = pub.list.find((x) => x.id === id);
     if (!a) throw new HttpError(404, 'Cet avis a déjà été supprimé. Recharge la liste.', 'notfound');
-    return { files: { [AVIS_PATH]: serialize(avis.list.filter((x) => x.id !== id)) }, message: `Suppression avis : ${a.prenom}`, result: a };
+    return { files: { [AVIS_PATH]: serialize(pub.list.filter((x) => x.id !== id)) }, message: `Suppression avis : ${a.prenom}`, result: id };
   });
-  return send(res, 200, { deleted: removed.id });
+  return send(res, 200, { deleted: removed });
 }
 
-export default handler(['GET', 'POST', 'DELETE'], run);
+export default handler(['GET', 'POST', 'PATCH', 'DELETE'], run);

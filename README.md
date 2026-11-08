@@ -71,16 +71,19 @@ Côté sécurité :
 
 **Modifier** ou **supprimer** un épisode se fait depuis la liste. Une suppression retire l'épisode et ses dessins du site, pas de Spotify.
 
-### Les avis des auditeurs
+### Les avis des auditeurs (avec modération)
 
-Sous chaque épisode, les auditeurs peuvent laisser un avis : prénom, note de 1 à 5 étoiles et message (300 caractères max). **L'avis est publié tout de suite**, sans relecture. Garde-fous :
-- les liens sont refusés (dans le prénom comme dans le message) ;
-- 3 avis maximum par personne toutes les 10 minutes ;
-- un piège invisible bloque les robots.
+Sous chaque épisode, les auditeurs peuvent envoyer un avis : prénom, note de 1 à 5 étoiles et message (300 caractères max). **Un avis n'apparaît sur le site qu'après ta validation.** Garde-fous à l'envoi : liens refusés, 3 avis maximum par personne toutes les 10 minutes, piège invisible anti-robots (champ « Ne pas remplir »).
 
-**Supprimer un avis** : dans l'admin, appuie sur **Avis (N)** sous l'épisode, puis sur **Supprimer l'avis** et confirme. L'avis disparaît du site dans les secondes qui suivent.
+**Valider ou refuser** : en haut de la liste de l'admin, la section **Avis en attente** montre le prénom, la note, le message, l'épisode et la date. **✅ Publier** le met en ligne (il apparaît en quelques secondes) ; **🗑️ Supprimer** (avec confirmation) l'efface définitivement. Un avis déjà publié se supprime toujours avec **Avis (N)** sous l'épisode.
 
-Les avis sont rangés dans `data/avis.json`. Chaque avis fait un petit commit (« Avis sur « <titre> » : <prénom> »), mais **ne redéploie pas le site** (réglage `ignoreCommand` de `vercel.json`) : la page épisode lit les avis en direct. Supprimer un épisode supprime aussi ses avis.
+Comment c'est rangé :
+- `data/avis.json` : les avis **publiés** (`"approuve": true`) ;
+- `data/avis-en-attente.json` : les avis **en attente**, **chiffrés** (le repo GitHub est public : sans ça, n'importe qui pourrait lire un avis non validé). La clé est dérivée de `SESSION_SECRET` : si tu changes cette variable, les avis encore en attente deviennent illisibles (l'admin te propose alors de les supprimer).
+- Ces deux fichiers ne sont **pas servis par le site** (`.vercelignore`) : seules les fonctions `api/` les lisent, et l'API publique ne renvoie que les avis publiés.
+- Chaque envoi, validation ou suppression fait un petit commit (message neutre pour un avis en attente, sans prénom), qui **ne redéploie pas le site** (`ignoreCommand` dans `vercel.json`).
+- Publier, lister les avis en attente et supprimer demandent la session admin, vérifiée côté serveur à chaque appel.
+- Supprimer un épisode supprime aussi ses avis, publiés ou en attente.
 
 ### Si ça ne marche pas
 
@@ -112,15 +115,17 @@ js/image-compress.js    compression des dessins avant l'envoi
 api/login.js, logout.js, session.js
 api/upload.js           envoie une image sur GitHub (sans commit)
 api/episodes.js         lit, ajoute, modifie, supprime (un commit par action)
-api/avis.js             avis des auditeurs (lecture publique, envoi, suppression par l'admin)
+api/avis.js             avis des auditeurs (lecture des avis publiés, envoi en attente, modération admin)
+api/_lib/avis-store.js  rangement des avis (publiés / en attente chiffrés)
 api/_lib/               session signée + client GitHub
 data/episodes.json      les épisodes
-data/avis.json          les avis des auditeurs
+data/avis.json          les avis publiés
+data/avis-en-attente.json  les avis en attente (chiffrés)
 images/dessins/<id>/    les dessins de chaque épisode
 images/pochettes/       la pochette carrée de chaque épisode
 images/logo/            logo SVG (contours Poppins Bold), favicon, pochette
 audio/                  jingles (le court joue sur « Écouter les 5 notes »)
-vercel.json, robots.txt
+vercel.json, robots.txt, .vercelignore
 ```
 
 ### Format d'un épisode (`data/episodes.json`)

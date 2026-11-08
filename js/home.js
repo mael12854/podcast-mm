@@ -1,5 +1,5 @@
 // Accueil : dernier épisode mis en avant + derniers épisodes.
-import { loadEpisodes, coverImg, renderCard, catBadge, specialBadges, epNum, metaLine, shortOf, esc, waves, episodeUrl, paperThumb, imgFallback, SHOW_URL } from './site.js';
+import { loadEpisodes, coverImg, titleHtml, renderCard, catBadge, specialBadges, epNum, metaLine, shortOf, esc, waves, episodeUrl, paperThumb, imgFallback, SHOW_URL } from './site.js';
 
 const featuredEl = document.getElementById('featured');
 const recentEl = document.getElementById('recent');
@@ -26,7 +26,7 @@ function renderFeatured(ep) {
   </div>
   <div class="featured__body">
     <div class="featured__badges">${catBadge(ep.categorie)}${specialBadges(ep, { isLatest: true })}</div>
-    <h3 class="featured__title" id="feat-title"><span class="sr-only">Épisode ${esc(ep.numero)} : </span>${esc(ep.titre)}</h3>
+    <h3 class="featured__title" id="feat-title">${titleHtml(ep)}</h3>
     <span class="featured__meta">${esc(metaLine(ep))}</span>
     <p class="featured__short">${esc(shortOf(ep.description))}</p>
     <div class="mini-player">
