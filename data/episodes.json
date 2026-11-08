@@ -1,5 +1,16 @@
 [
   {
+    "id": "episode-003-les-dessinateurs",
+    "numero": 3,
+    "titre": "Épisode #003 : Les dessinateurs",
+    "date": "2026-11-08",
+    "categorie": "chronique",
+    "description": "Dans cet épisode, on parle de dessinateurs ! D’abord Marion Montaigne, la reine de la BD qui rend la science drôle (Tu mourras moins bête, Dans la combi de Thomas Pesquet, Space Montaigne). Puis moi, Maël : comment je me suis mis à dessiner, mes outils, mon blog BD Spécimens… et la règle n°1 du dessinateur : attention aux dents. 👹\n\n🔗 Les liens de l’épisode :\n🖊️ Spécimens, mon blog BD : https://dessins-mael.vercel.app\n📻 Le site de Double M : https://podcast-mm.vercel.app",
+    "spotifyUrl": "https://open.spotify.com/episode/0hThAO2jEs9cfQLX3wX0qJ",
+    "duree": "4 minutes 25",
+    "pochette": "images/pochettes/episode-003-les-dessinateurs-84a742.jpg"
+  },
+  {
     "id": "episode-002-maladies-vrai-ou-faux",
     "numero": 2,
     "titre": "Épisode #002 — Maladies : vrai ou faux ?",
