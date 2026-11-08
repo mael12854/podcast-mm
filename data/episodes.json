@@ -1,5 +1,17 @@
 [
   {
+    "id": "episode-002-maladies-vrai-ou-faux",
+    "numero": 2,
+    "titre": "Épisode #002 — Maladies : vrai ou faux ?",
+    "date": "2026-11-08",
+    "categorie": "chronique",
+    "description": "Le froid rend-il malade ? Un chewing-gum avalé reste-t-il vraiment 7 ans dans le ventre ? Faire craquer ses doigts donne-t-il de l’arthrose ? 🦠\n\nDans ce 2e épisode de Double M, on démonte 8 mythes sur les maladies, on explique la différence entre un rhume et une grippe, comment fonctionne la gastro… et même pourquoi on a le hoquet !\n\nAu programme des trucs M&M : L’Hôpital M&M, le blog BD Spécimens et le site de Double M.\n\n⚠️ On n’est pas médecins : si vous êtes malades, demandez à un vrai docteur !\n\n🔗 Les liens de l’épisode :\n🏥 L’Hôpital M&M : https://hosto-mm.vercel.app\n🖊️ Spécimens, le blog BD : https://dessins-mael.vercel.app\n📻 Le site de Double M : https://podcast-mm.vercel.app",
+    "spotifyUrl": "https://open.spotify.com/episode/7xlfexZ2q6LzeUIkA9g3gw",
+    "duree": "12 minutes 21",
+    "auteurs": "Maël",
+    "pochette": "images/pochettes/episode-002-maladies-vrai-ou-faux-082729.jpg"
+  },
+  {
     "id": "episode-001-presentation",
     "numero": 1,
     "titre": "Épisode #001 - Présentation",
