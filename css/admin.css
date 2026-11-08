@@ -245,3 +245,19 @@ body.admin { background: var(--dm-night); }
 .avis-admin__stars { color: var(--dm-gold); letter-spacing: 1px; }
 .avis-admin__stars span { color: color-mix(in srgb, var(--dm-lavender) 45%, transparent); }
 .avis-admin__item p { font-size: 14px; line-height: 1.5; color: var(--dm-text-muted); overflow-wrap: anywhere; }
+
+/* ---------- Pochette de l'épisode ---------- */
+.cover-field { display: flex; gap: var(--dm-space-4); align-items: center; flex-wrap: wrap; }
+.cover-field__preview {
+  position: relative; flex: none; width: 120px; aspect-ratio: 1; border-radius: var(--dm-radius-sm); overflow: hidden;
+  background: radial-gradient(100% 120% at 70% 30%, var(--dm-night-glow), var(--dm-night) 60%, var(--dm-night-deep));
+  border: 1.5px dashed color-mix(in srgb, var(--dm-lavender) 45%, transparent);
+  display: flex; align-items: center; justify-content: center;
+}
+.cover-field__preview.has-img { border-style: solid; box-shadow: var(--dm-shadow-card); }
+.cover-field__preview img { width: 100%; height: 100%; object-fit: cover; }
+.cover-field__empty { font-size: var(--dm-fs-caption); color: var(--dm-text-faint); text-align: center; padding: 8px; }
+.cover-field__actions { display: flex; gap: var(--dm-space-2); flex-wrap: wrap; }
+.cover-field__pick { position: relative; cursor: pointer; }
+.cover-field__pick input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.cover-field__pick:focus-within { box-shadow: var(--dm-focus-ring); }

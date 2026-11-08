@@ -39,6 +39,14 @@ function validate(input, { id, existing }) {
   const auteurs = str(input.auteurs, 80); if (auteurs) ep.auteurs = auteurs;
 
   const add = [];
+  // Pochette carrée (facultative) : nouvelle image envoyée, ou image actuelle gardée.
+  const poch = input.pochette;
+  if (poch && typeof poch.upload === 'string' && /^[0-9a-f]{40}$/.test(poch.upload)) {
+    ep.pochette = `images/pochettes/${id}-${crypto.randomBytes(3).toString('hex')}.jpg`;
+    add.push({ path: ep.pochette, sha: poch.upload });
+  } else if (poch && typeof poch.src === 'string' && existing && poch.src === existing.pochette) {
+    ep.pochette = poch.src;
+  }
   if (ep.categorie === 'dessin') {
     const list = Array.isArray(input.dessins) ? input.dessins : [];
     if (!list.length) errors.dessins = 'Ajoute au moins un dessin pour un épisode radio-dessiné.';
@@ -73,7 +81,9 @@ function validate(input, { id, existing }) {
 }
 
 const sortList = (list) => [...list].sort((a, b) => String(b.date).localeCompare(String(a.date)) || Number(b.numero) - Number(a.numero));
-const drawingPaths = (ep) => (ep?.dessins || []).map((d) => d.src).filter((s) => typeof s === 'string' && s.startsWith('images/dessins/'));
+// Images rattachées à un épisode (dessins + pochette) : supprimées avec lui ou quand on les remplace.
+const drawingPaths = (ep) => [...(ep?.dessins || []).map((d) => d.src), ep?.pochette]
+  .filter((s) => typeof s === 'string' && (s.startsWith('images/dessins/') || s.startsWith('images/pochettes/')));
 
 function checkVersion(current, version) {
   if (!version || version !== current.version) {

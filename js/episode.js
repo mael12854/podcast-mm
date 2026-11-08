@@ -1,5 +1,5 @@
 // Page épisode : en-tête, lecteur Spotify, texte, galerie des dessins, « À écouter aussi ».
-import { loadEpisodes, linkify, catBadge, specialBadges, metaLine, paragraphs, shortOf, esc, waves, spotifyEpisodeId,
+import { loadEpisodes, linkify, coverImg, catBadge, specialBadges, metaLine, paragraphs, shortOf, esc, waves, spotifyEpisodeId,
   renderMiniCard, imgSrc, imgSrcset, imgFallback, TAPES, TILTS, SHOW_URL } from './site.js';
 import { openLightbox } from './lightbox.js';
 import { initReviews } from './avis.js';
@@ -64,13 +64,16 @@ function render(ep, all) {
   root.innerHTML = `
   <section class="ep-hero">
     ${waves([[220, .4], [400, .24], [600, .12]], 'waves--animated')}
-    <div class="container ep-hero__inner">
+    <div class="container ep-hero__inner ${ep.pochette ? 'has-cover' : ''}">
       <a class="back-link" href="/episodes">← TOUS LES ÉPISODES</a>
+      ${ep.pochette ? coverImg(ep, 'ep-hero__cover', 320, '(min-width: 760px) 280px, 160px').replace('alt=""', `alt="Pochette de l'épisode « ${esc(ep.titre)} »"`).replace(' loading="lazy"', '') : ''}
+      <div class="ep-hero__main">
       <div class="ep-hero__badges">${catBadge(ep.categorie)}<span class="ep-hero__num"><span class="n">N°</span> <span class="v">${esc(ep.numero)}</span></span>${specialBadges(ep, { isLatest: all[0] && all[0].id === ep.id })}</div>
       <h1 class="ep-hero__title">${esc(ep.titre)}</h1>
       <span class="ep-hero__meta">${esc(metaLine(ep))}</span>
       <div class="ep-hero__actions">
         <a class="btn btn--gold btn--lg btn--play" href="${esc(listen)}" target="_blank" rel="noopener"><span class="play-dot" aria-hidden="true"></span>ÉCOUTER SUR SPOTIFY<span class="sr-only"> (nouvel onglet)</span></a>
+      </div>
       </div>
     </div>
   </section>

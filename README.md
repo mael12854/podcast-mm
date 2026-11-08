@@ -60,6 +60,7 @@ Côté sécurité :
    - **Durée** et **Qui parle** : facultatifs (ex. « 18 min », « Maël & Marin »).
    - **Catégorie** : Chronique, Chronique des parents ou Dessin radio-dessiné.
    - **Description** : une ligne vide crée un nouveau paragraphe. La première phrase sert de résumé sur les cartes.
+   - **Pochette** (facultatif) : l'image carrée de l'épisode, comme sur Spotify. Si l'image n'est pas carrée, elle est recadrée au centre. Elle s'affiche sur les cartes, sur l'accueil et à côté du titre de l'épisode.
    - **Lien Spotify** : dans Spotify, ⋯ › Partager › Copier le lien de l'épisode. Il doit commencer par `https://open.spotify.com/episode/`.
 4. Pour un **dessin radio-dessiné** :
    - ajoute les dessins (JPG ou PNG, 10 Mo max, 12 max). Ils sont compressés dans le téléphone avant l'envoi (2000 px, JPG qualité 85) et tu vois l'aperçu tout de suite ;
@@ -116,6 +117,7 @@ api/_lib/               session signée + client GitHub
 data/episodes.json      les épisodes
 data/avis.json          les avis des auditeurs
 images/dessins/<id>/    les dessins de chaque épisode
+images/pochettes/       la pochette carrée de chaque épisode
 images/logo/            logo SVG (contours Poppins Bold), favicon, pochette
 audio/                  jingles (le court joue sur « Écouter les 5 notes »)
 vercel.json, robots.txt
@@ -134,6 +136,7 @@ vercel.json, robots.txt
   "spotifyUrl": "https://open.spotify.com/episode/…",
   "duree": "18 min",
   "auteurs": "Maël & Marin",
+  "pochette": "images/pochettes/le-dragon-qui-avait-peur-du-noir-4f2a9c.jpg",
   "dessins": [
     { "src": "images/dessins/le-dragon-qui-avait-peur-du-noir/01-a1b2c3.jpg", "legende": "Le dragon dans sa grotte", "minutage": "01:05", "auteur": "Marin" }
   ]
@@ -141,7 +144,7 @@ vercel.json, robots.txt
 ```
 
 - Obligatoires : `id`, `numero`, `titre`, `date`, `categorie` (`chronique`, `parents` ou `dessin`), `description`, `spotifyUrl`.
-- Facultatifs : `duree`, `auteurs`, `dessins`.
+- Facultatifs : `duree`, `auteurs`, `pochette` (image carrée), `dessins`.
 - Pour chaque dessin, `src` et `legende` sont obligatoires ; `minutage` et `auteur` sont facultatifs. L'ordre de la galerie suit l'ordre de la liste, et l'orientation se lit sur l'image.
 - L'épisode n° 1 porte la bande « 1ER ÉPISODE », le plus récent la bande « NOUVEL ÉPISODE ».
 

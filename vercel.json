@@ -16,7 +16,7 @@
     ],
     "localPatterns": [
       {
-        "pathname": "^/images/dessins/.*$"
+        "pathname": "^/images/(dessins|pochettes)/.*$"
       }
     ],
     "formats": [

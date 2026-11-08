@@ -1,5 +1,5 @@
 // Accueil : dernier épisode mis en avant + derniers épisodes.
-import { loadEpisodes, renderCard, catBadge, specialBadges, epNum, metaLine, shortOf, esc, waves, episodeUrl, paperThumb, imgFallback, SHOW_URL } from './site.js';
+import { loadEpisodes, coverImg, renderCard, catBadge, specialBadges, epNum, metaLine, shortOf, esc, waves, episodeUrl, paperThumb, imgFallback, SHOW_URL } from './site.js';
 
 const featuredEl = document.getElementById('featured');
 const recentEl = document.getElementById('recent');
@@ -20,7 +20,8 @@ function renderFeatured(ep) {
 <article class="featured" aria-labelledby="feat-title">
   <div class="featured__visual">
     ${waves([[140, .45], [260, .28], [400, .15]])}
-    ${isDessin ? paperThumb(d[0] && d[0].src, 'featured__d1', 'gold', 480) + paperThumb(d[1] && d[1].src, 'featured__d2', 'coral', 400) : ''}
+    ${ep.pochette ? coverImg(ep, 'featured__cover', 384, '(min-width: 760px) 240px, 45vw')
+      : (isDessin ? paperThumb(d[0] && d[0].src, 'featured__d1', 'gold', 480) + paperThumb(d[1] && d[1].src, 'featured__d2', 'coral', 400) : '')}
     ${epNum(ep, 'featured__num')}
   </div>
   <div class="featured__body">

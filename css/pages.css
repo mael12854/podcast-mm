@@ -245,3 +245,20 @@
 .star-input label:hover { transform: scale(1.1); }
 .star-input input:focus-visible + span { box-shadow: var(--dm-focus-ring); border-radius: 50%; }
 .review-form__status { font-size: var(--dm-fs-small); color: var(--dm-gold-light); font-weight: 600; }
+
+/* ---------- Pochette carrée : accueil et page épisode ---------- */
+.featured__cover {
+  position: absolute; right: 10%; top: 50%; transform: translateY(-50%); width: min(42%, 240px); aspect-ratio: 1; height: auto;
+  object-fit: cover; border-radius: var(--dm-radius-md); box-shadow: var(--dm-shadow-pop);
+}
+.ep-hero__main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.ep-hero__cover {
+  width: 160px; aspect-ratio: 1; height: auto; object-fit: cover;
+  border-radius: var(--dm-radius-md); box-shadow: var(--dm-shadow-pop);
+}
+@media (min-width: 760px) {
+  .ep-hero__inner.has-cover { display: grid; grid-template-columns: minmax(0, 1fr) minmax(200px, 280px); column-gap: var(--dm-space-7); row-gap: 18px; align-items: center; }
+  .ep-hero__inner.has-cover .back-link { grid-column: 1 / -1; }
+  .ep-hero__inner.has-cover .ep-hero__cover { grid-column: 2; grid-row: 2; width: 100%; }
+  .ep-hero__inner.has-cover .ep-hero__main { grid-column: 1; grid-row: 2; }
+}

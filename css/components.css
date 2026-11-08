@@ -276,3 +276,10 @@ input[type="date"].input { color-scheme: dark; }
   text-align: center; color: var(--dm-text-muted); font-size: 16px;
 }
 .loading-note { color: var(--dm-text-muted); font-size: var(--dm-fs-small); padding: var(--dm-space-6) 0; }
+
+/* ---------- Pochette carrée de l'épisode ---------- */
+.card__cover {
+  position: absolute; right: 14px; bottom: 14px; height: 55%; aspect-ratio: 1; width: auto; object-fit: cover;
+  border-radius: var(--dm-radius-sm); box-shadow: var(--dm-shadow-pop);
+}
+.num-tile--cover { padding: 0; object-fit: cover; }

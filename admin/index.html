@@ -123,6 +123,22 @@
         <p class="err" id="e-spotifyUrl" hidden></p>
       </div>
 
+      <div class="field">
+        <span class="field__label" id="l-pochette">Pochette de l'épisode <span class="opt">facultatif</span></span>
+        <div class="cover-field">
+          <div class="cover-field__preview" id="cover-preview" aria-hidden="true"><span class="cover-field__empty">Pas de pochette</span></div>
+          <div class="cover-field__actions">
+            <label class="pill-btn pill-btn--lav cover-field__pick">
+              <input type="file" id="f-cover" accept="image/jpeg,image/png" aria-labelledby="l-pochette cover-pick-label" aria-describedby="cover-help e-pochette">
+              <span id="cover-pick-label">Choisir une image</span>
+            </label>
+            <button class="pill-btn pill-btn--danger" type="button" id="cover-remove" hidden>Retirer</button>
+          </div>
+        </div>
+        <p class="field__help" id="cover-help">Image carrée, comme sur Spotify. Si elle ne l'est pas, on la recadre au centre. JPG ou PNG, 10 Mo max.</p>
+        <p class="err" id="e-pochette" hidden></p>
+      </div>
+
       <div class="field" id="drawings-field" hidden>
         <span class="field__label" id="l-dessins">Dessins <span class="field__count" id="draw-count">0 / 12</span></span>
         <label class="drop" id="drop">

@@ -108,6 +108,13 @@ function paperThumb(src, cls, tape, width) {
   return `<div class="paper ${cls}" aria-hidden="true">${img}<span class="tape tape--${tape}"></span></div>`;
 }
 
+// Pochette carrée de l'épisode (décorative à côté du titre : alt vide).
+export function coverImg(ep, cls, width, sizes) {
+  if (!ep.pochette) return '';
+  const set = imgSrcset(ep.pochette, [width, width * 2]);
+  return `<img class="${cls}" src="${esc(imgSrc(ep.pochette, width))}" ${set ? `srcset="${esc(set)}" sizes="${sizes || width + 'px'}"` : ''} data-src="${esc(ep.pochette)}" alt="" loading="lazy" decoding="async">`;
+}
+
 export function renderCard(ep, { level = 3, latestId = null } = {}) {
   const isDessin = ep.categorie === 'dessin';
   const first = isDessin && ep.dessins && ep.dessins[0] ? ep.dessins[0].src : null;
@@ -116,7 +123,7 @@ export function renderCard(ep, { level = 3, latestId = null } = {}) {
 <article class="card">
   <div class="card__visual">
     ${waves([[90, .45], [170, .28], [260, .15]], 'waves--thin')}
-    ${isDessin ? paperThumb(first, 'card__drawing', 'lavender', 320) : ''}
+    ${ep.pochette ? coverImg(ep, 'card__cover', 320, '120px') : (isDessin ? paperThumb(first, 'card__drawing', 'lavender', 320) : '')}
     <div class="card__badges">${catBadge(ep.categorie, 'card')}${specialBadges(ep, { isLatest: ep.id === latestId })}</div>
     ${epNum(ep, 'card__num')}
   </div>
@@ -132,7 +139,7 @@ export function renderCard(ep, { level = 3, latestId = null } = {}) {
 export function renderMiniCard(ep) {
   return `
 <article class="mini-card">
-  <span class="num-tile" aria-hidden="true">${esc(ep.numero)}</span>
+  ${ep.pochette ? coverImg(ep, 'num-tile num-tile--cover', 144, '72px') : `<span class="num-tile" aria-hidden="true">${esc(ep.numero)}</span>`}
   <div class="mini-card__body">
     ${catBadge(ep.categorie, 'list')}
     <h3 class="mini-card__title"><a href="${episodeUrl(ep)}"><span class="sr-only">Épisode ${esc(ep.numero)} : </span>${esc(ep.titre)}</a></h3>

@@ -29,6 +29,7 @@ const state = {
   confirmId: null,
   editId: null,
   drawings: [],
+  cover: null,
   busy: false,
   dirty: false,
   resumeForm: false,
@@ -313,6 +314,8 @@ function openForm(ep) {
   state.editId = ep ? ep.id : null;
   state.drawings.forEach((d) => d.file && URL.revokeObjectURL(d.url));
   state.drawings = (ep?.dessins || []).map((d, i) => ({ key: `e${i}-${Date.now()}`, src: d.src, url: '/' + d.src, legende: d.legende || '', minutage: d.minutage || '', auteur: d.auteur || '' }));
+  if (state.cover && state.cover.blob) URL.revokeObjectURL(state.cover.url);
+  state.cover = ep?.pochette ? { src: ep.pochette, url: '/' + ep.pochette } : null;
   form.reset();
   F('titre').value = ep?.titre || '';
   F('date').value = ep?.date || today();
@@ -329,6 +332,7 @@ function openForm(ep) {
   formError(null);
   updateDescCount();
   renderDrawings();
+  renderCover();
   state.dirty = false;
   show('form');
 }
@@ -354,7 +358,7 @@ function fieldError(name, msg) {
   if (name === 'spotifyUrl') $('#spotify-help').hidden = !!msg;
 }
 
-function clearErrors() { ['titre', 'date', 'categorie', 'description', 'spotifyUrl', 'dessins'].forEach((n) => fieldError(n, null)); $$('.dr .input').forEach((i) => i.setAttribute('aria-invalid', 'false')); }
+function clearErrors() { ['titre', 'date', 'categorie', 'description', 'spotifyUrl', 'pochette', 'dessins'].forEach((n) => fieldError(n, null)); $$('.dr .input').forEach((i) => i.setAttribute('aria-invalid', 'false')); }
 
 function formError(message, actionLabel, soft) {
   const box = $('#form-error');
@@ -394,6 +398,7 @@ function validate(ep) {
   if (!ep.categorie) errs.categorie = 'Choisis une catégorie.';
   if (!ep.description) errs.description = "Écris quelques lignes pour présenter l'épisode.";
   if (!SPOTIFY_RE.test(ep.spotifyUrl)) errs.spotifyUrl = 'Ce lien ne mène pas à un épisode. Il doit commencer par https://open.spotify.com/episode/';
+  if (state.cover && state.cover.status === 'prep') errs.pochette = 'Attends la fin de la préparation de la pochette.';
   if (ep.categorie === 'dessin') {
     if (!state.drawings.length) errs.dessins = 'Ajoute au moins un dessin pour un épisode radio-dessiné.';
     else if (state.drawings.some((d) => d.status === 'prep')) errs.dessins = 'Attends la fin de la préparation des dessins.';
@@ -440,13 +445,19 @@ form.addEventListener('submit', async (e) => {
 
   const isDessin = ep.categorie === 'dessin';
   const toUpload = isDessin ? state.drawings.filter((d) => d.blob && !d.upload) : [];
-  setBusy(true, toUpload.length ? `On envoie ${toUpload.length} dessin${toUpload.length > 1 ? 's' : ''}, ne ferme pas la page.` : 'Ça prend quelques secondes.');
+  const coverToUpload = state.cover && state.cover.blob && !state.cover.upload ? state.cover : null;
+  const n = toUpload.length;
+  setBusy(true, n
+    ? `On envoie ${n} dessin${n > 1 ? 's' : ''}${coverToUpload ? ' et la pochette' : ''}, ne ferme pas la page.`
+    : (coverToUpload ? 'On envoie la pochette, ne ferme pas la page.' : 'Ça prend quelques secondes.'));
   try {
+    if (coverToUpload) coverToUpload.upload = await uploadDrawing(coverToUpload);
     for (const d of toUpload) {
       setProgress(d, 2);
       d.upload = await uploadDrawing(d); // gardé : en cas de nouvel essai, on ne renvoie pas l'image
     }
     $('#loading-msg').textContent = 'On enregistre l\'épisode…';
+    ep.pochette = state.cover ? (state.cover.upload ? { upload: state.cover.upload } : { src: state.cover.src }) : null;
     ep.dessins = isDessin ? state.drawings.map((d) => ({
       ...(d.upload ? { upload: d.upload } : { src: d.src }),
       legende: d.legende.trim(), minutage: d.minutage.trim(), auteur: d.auteur.trim(),
@@ -486,6 +497,42 @@ async function refreshVersion() {
     if (ex.code !== 'session') formError(ex.error);
   }
 }
+
+// ---------- Pochette carrée ----------
+const coverInput = $('#f-cover');
+function renderCover() {
+  const box = $('#cover-preview');
+  const c = state.cover;
+  box.classList.toggle('has-img', !!(c && c.url));
+  box.innerHTML = c && c.url ? `<img src="${esc(c.url)}" alt="">` : `<span class="cover-field__empty">${c && c.status === 'prep' ? 'Préparation…' : 'Pas de pochette'}</span>`;
+  $('#cover-remove').hidden = !c;
+  $('#cover-pick-label').textContent = c ? 'Changer l\'image' : 'Choisir une image';
+}
+coverInput.addEventListener('change', async () => {
+  const file = coverInput.files[0];
+  coverInput.value = '';
+  if (!file) return;
+  if (!/^image\/(jpeg|png)$/.test(file.type)) return fieldError('pochette', 'La pochette doit être en JPG ou en PNG.');
+  if (file.size > MAX_FILE_BYTES) return fieldError('pochette', 'Cette image fait plus de 10 Mo. Choisis une version plus légère.');
+  fieldError('pochette', null);
+  if (state.cover && state.cover.blob) URL.revokeObjectURL(state.cover.url);
+  const item = { status: 'prep', url: '' };
+  state.cover = item; state.dirty = true; renderCover();
+  try {
+    const out = await compressImage(file, { square: true, maxSide: 1400 });
+    if (state.cover !== item) return; // remplacée entre-temps
+    item.blob = out.blob; item.url = URL.createObjectURL(out.blob); item.status = 'ready';
+  } catch {
+    if (state.cover === item) state.cover = null;
+    fieldError('pochette', 'Impossible de lire cette image. Essaie avec un autre fichier.');
+  }
+  renderCover();
+});
+$('#cover-remove').addEventListener('click', () => {
+  if (state.cover && state.cover.blob) URL.revokeObjectURL(state.cover.url);
+  state.cover = null; state.dirty = true; fieldError('pochette', null); renderCover();
+  coverInput.focus();
+});
 
 // ---------- Dessins : ajout, aperçu, compression, ordre ----------
 const drop = $('#drop');
