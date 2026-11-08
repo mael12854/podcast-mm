@@ -346,7 +346,7 @@ form.addEventListener('change', (e) => {
   if (e.target.name === 'categorie') { setCategory(e.target.value); fieldError('categorie', null); }
 });
 
-function updateDescCount() { $('#desc-count').textContent = `${F('description').value.length} / 600`; }
+function updateDescCount() { $('#desc-count').textContent = `${F('description').value.length} / 2000`; }
 
 function fieldError(name, msg) {
   const p = $(`#e-${name}`);

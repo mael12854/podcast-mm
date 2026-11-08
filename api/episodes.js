@@ -26,7 +26,7 @@ function validate(input, { id, existing }) {
     titre: str(input.titre, 120).replace(/\s+/g, ' '),
     date: str(input.date, 10),
     categorie: input.categorie,
-    description: typeof input.description === 'string' ? input.description.replace(/\r\n/g, '\n').trim().slice(0, 600) : '',
+    description: typeof input.description === 'string' ? input.description.replace(/\r\n/g, '\n').trim().slice(0, 2000) : '',
     spotifyUrl: str(input.spotifyUrl, 300),
   };
   if (!ep.titre) errors.titre = "Donne un titre à l'épisode.";
