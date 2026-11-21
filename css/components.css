@@ -283,3 +283,6 @@ input[type="date"].input { color-scheme: dark; }
   border-radius: var(--dm-radius-sm); box-shadow: var(--dm-shadow-pop);
 }
 .num-tile--cover { padding: 0; object-fit: cover; }
+
+/* Carte d'un épisode radio-dessiné sans dessin : sa première slide (16:9) */
+.card__drawing--wide { top: 58px; width: 52%; aspect-ratio: 16 / 9; transform: rotate(3deg); }

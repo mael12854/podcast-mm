@@ -62,12 +62,13 @@ Côté sécurité :
    - **Description** : une ligne vide crée un nouveau paragraphe. La première phrase sert de résumé sur les cartes.
    - **Pochette** (facultatif) : l'image carrée de l'épisode, comme sur Spotify. Si l'image n'est pas carrée, elle est recadrée au centre. Elle s'affiche sur les cartes, sur l'accueil et à côté du titre de l'épisode.
    - **Lien Spotify** : dans Spotify, ⋯ › Partager › Copier le lien de l'épisode. Il doit commencer par `https://open.spotify.com/episode/`.
-4. Pour un **dessin radio-dessiné** :
+4. **Slides** (facultatif, toutes catégories) : ajoute une image par slide (16:9, JPG ou PNG, 30 max). Comme les dessins, elles sont compressées avant l'envoi ; chaque slide a une **légende obligatoire** ; change l'ordre avec ↑ ↓. Astuce : dans Google Slides, Fichier › Télécharger › PDF, puis une image par page.
+5. Pour un **dessin radio-dessiné** :
    - ajoute les dessins (JPG ou PNG, 10 Mo max, 12 max). Ils sont compressés dans le téléphone avant l'envoi (2000 px, JPG qualité 85) et tu vois l'aperçu tout de suite ;
    - donne une **légende** à chaque dessin (obligatoire : elle décrit le dessin à ceux qui ne le voient pas) ;
    - le **minutage** (ex. `06:40`) et l'**auteur** sont facultatifs ;
    - change l'ordre avec ↑ ↓, ou en glissant les vignettes.
-5. Appuie sur **PUBLIER**. L'admin envoie les dessins, puis fait **un seul commit** (« Ajout épisode : <titre> »). L'écran « Publié ! » indique quand l'épisode est en ligne, en général au bout d'une minute environ.
+6. Appuie sur **PUBLIER**. L'admin envoie les dessins, puis fait **un seul commit** (« Ajout épisode : <titre> »). L'écran « Publié ! » indique quand l'épisode est en ligne, en général au bout d'une minute environ.
 
 **Modifier** ou **supprimer** un épisode se fait depuis la liste. Une suppression retire l'épisode et ses dessins du site, pas de Spotify.
 
@@ -109,7 +110,7 @@ css/components.css      header, footer, cartes, galerie, visionneuse
 css/pages.css           styles propres à chaque page
 css/admin.css           styles de l'admin
 js/site.js              outils communs (chargement des épisodes, cartes, menu mobile)
-js/home.js, episodes.js, episode.js, about.js, lightbox.js, avis.js
+js/home.js, episodes.js, episode.js, about.js, lightbox.js, avis.js, slides.js
 js/admin.js             logique de l'admin
 js/image-compress.js    compression des dessins avant l'envoi
 api/login.js, logout.js, session.js
@@ -123,6 +124,7 @@ data/avis.json          les avis publiés
 data/avis-en-attente.json  les avis en attente (chiffrés)
 images/dessins/<id>/    les dessins de chaque épisode
 images/pochettes/       la pochette carrée de chaque épisode
+images/slides/<id>/     les slides de chaque épisode (16:9)
 images/logo/            logo SVG (contours Poppins Bold), favicon, pochette
 audio/                  jingles (le court joue sur « Écouter les 5 notes »)
 vercel.json, robots.txt, .vercelignore
@@ -142,6 +144,9 @@ vercel.json, robots.txt, .vercelignore
   "duree": "18 min",
   "auteurs": "Maël & Marin",
   "pochette": "images/pochettes/le-dragon-qui-avait-peur-du-noir-4f2a9c.jpg",
+  "slides": [
+    { "src": "images/slides/le-dragon-qui-avait-peur-du-noir/01-7c3e1a.jpg", "legende": "Couverture « Émission radio-dessinée n° 004 »" }
+  ],
   "dessins": [
     { "src": "images/dessins/le-dragon-qui-avait-peur-du-noir/01-a1b2c3.jpg", "legende": "Le dragon dans sa grotte", "minutage": "01:05", "auteur": "Marin" }
   ]
@@ -149,7 +154,9 @@ vercel.json, robots.txt, .vercelignore
 ```
 
 - Obligatoires : `id`, `numero`, `titre`, `date`, `categorie` (`chronique`, `parents` ou `dessin`), `description`, `spotifyUrl`.
-- Facultatifs : `duree`, `auteurs`, `pochette` (image carrée), `dessins`.
+- Facultatifs : `duree`, `auteurs`, `pochette` (image carrée), `slides`, `dessins`.
+- Pour chaque slide (`slides`) : `src` et `legende` sont obligatoires ; la légende décrit la slide à ceux qui ne la voient pas. Images en 16:9, 2000 px de large, JPG qualité 85, rangées dans `images/slides/<id-épisode>/01-xxxxxx.jpg`, `02-…` dans l'ordre. Sur la page de l'épisode, la section « Les slides » (au-dessus des dessins) montre une slide à la fois : flèches, clavier ← →, swipe sur mobile, clic pour agrandir.
+- Un épisode « Dessin radio-dessiné » doit avoir au moins un dessin **ou** des slides.
 - Pour chaque dessin, `src` et `legende` sont obligatoires ; `minutage` et `auteur` sont facultatifs. L'ordre de la galerie suit l'ordre de la liste, et l'orientation se lit sur l'image.
 - L'épisode n° 1 porte la bande « 1ER ÉPISODE », le plus récent la bande « NOUVEL ÉPISODE ».
 

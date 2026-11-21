@@ -3,6 +3,7 @@ import { loadEpisodes, linkify, coverImg, catBadge, specialBadges, metaLine, par
   renderMiniCard, imgSrc, imgSrcset, imgFallback, TAPES, TILTS, SHOW_URL } from './site.js';
 import { openLightbox } from './lightbox.js';
 import { initReviews } from './avis.js';
+import { slidesSection, initSlides } from './slides.js';
 
 const root = document.getElementById('episode-root');
 const id = new URLSearchParams(location.search).get('id');
@@ -89,6 +90,8 @@ function render(ep, all) {
     </div>
   </section>
 
+  ${slidesSection(ep)}
+
   ${gallery(ep)}
 
   <section class="container reviews" id="avis" aria-labelledby="reviews-title"></section>
@@ -101,6 +104,7 @@ function render(ep, all) {
 
   imgFallback(root);
   initReviews(root.querySelector('#avis'), ep);
+  initSlides(root, ep);
   // L'orientation (portrait / paysage) se lit sur l'image : le cadre papier suit ses proportions.
   root.querySelectorAll('.drawing .paper__img').forEach((im) => {
     const fit = () => { if (im.naturalWidth) im.closest('.paper').style.setProperty('--ratio', `${im.naturalWidth} / ${im.naturalHeight}`); };
