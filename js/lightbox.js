@@ -19,7 +19,7 @@ function show(i) {
   img.src = imgSrc(d.src, 1200);
   img.onerror = () => { img.onerror = null; img.removeAttribute('srcset'); img.src = '/' + d.src.replace(/^\/+/, ''); };
   title.textContent = d.legende;
-  pos.textContent = [`${index + 1} / ${items.length}`, d.minutage ? `▶ ${d.minutage}` : '', d.auteur ? `Dessin de ${d.auteur}` : ''].filter(Boolean).join(' · ');
+  pos.textContent = [`${index + 1} / ${items.length}`, d.auteur ? `Dessin de ${d.auteur}` : ''].filter(Boolean).join(' · ');
   dlg.querySelectorAll('.lightbox__arrow').forEach((b) => { b.hidden = items.length < 2; });
 }
 

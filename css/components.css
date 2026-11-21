@@ -193,10 +193,6 @@
   display: flex; flex-wrap: wrap; align-items: center; gap: var(--dm-space-2);
   font-size: var(--dm-fs-caption); font-weight: 500; color: var(--dm-text-muted);
 }
-.timestamp {
-  font: 700 12px ui-monospace, Menlo, Consolas, monospace; color: var(--dm-night);
-  background: var(--dm-gold-light); padding: 3px 7px; border-radius: var(--dm-radius-pill);
-}
 .drawing__by { color: var(--dm-text-faint); }
 
 /* ---------- Visionneuse ---------- */
