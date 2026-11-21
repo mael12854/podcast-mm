@@ -495,7 +495,6 @@ function validate(ep) {
     if (!drawings.length && !slides.length) errs.dessins = 'Ajoute au moins un dessin (ou des slides) pour un épisode radio-dessiné.';
     else if (drawings.some((d) => d.status === 'prep')) errs.dessins = 'Attends la fin de la préparation des dessins.';
     else if (drawings.some((d) => !d.legende.trim())) errs.dessins = 'Chaque dessin a besoin d\'une légende (elle décrit le dessin à ceux qui ne le voient pas).';
-    else if (drawings.some((d) => d.minutage.trim() && !/^\d{1,2}:[0-5]\d$/.test(d.minutage.trim()))) errs.dessins = 'Le minutage s\'écrit en minutes:secondes, par exemple 06:40.';
   }
   return errs;
 }
@@ -552,7 +551,7 @@ form.addEventListener('submit', async (e) => {
     ep.slides = slidesList.items.map((d) => ({ ...(d.upload ? { upload: d.upload } : { src: d.src }), legende: d.legende.trim() }));
     ep.dessins = isDessin ? drawingsList.items.map((d) => ({
       ...(d.upload ? { upload: d.upload } : { src: d.src }),
-      legende: d.legende.trim(), minutage: d.minutage.trim(), auteur: d.auteur.trim(),
+      legende: d.legende.trim(), auteur: d.auteur.trim(),
     })) : [];
     const res = state.editId
       ? await api('PUT', `/api/episodes?id=${encodeURIComponent(state.editId)}`, { episode: ep, version: state.version })
@@ -639,7 +638,7 @@ function imageList(cfg) {
 
   L.load = (arr) => {
     L.items.forEach((d) => d.file && d.url && URL.revokeObjectURL(d.url));
-    L.items = (arr || []).map((d, i) => ({ key: `${cfg.prefix}e${i}-${Date.now()}`, src: d.src, url: '/' + d.src, legende: d.legende || '', minutage: d.minutage || '', auteur: d.auteur || '' }));
+    L.items = (arr || []).map((d, i) => ({ key: `${cfg.prefix}e${i}-${Date.now()}`, src: d.src, url: '/' + d.src, legende: d.legende || '', auteur: d.auteur || '' }));
     L.render();
   };
 
@@ -662,15 +661,9 @@ function imageList(cfg) {
           <label class="field__label" for="leg-${d.key}">Légende ${cfg.of(i + 1)}</label>
           <input class="input input--sm" id="leg-${d.key}" data-f="legende" maxlength="${cfg.legendMax}" value="${esc(d.legende)}" placeholder="${esc(cfg.placeholder)}">
         </div>
-        ${cfg.extras ? `<div class="grid-2">
-          <div class="field">
-            <label class="field__label" for="min-${d.key}">Minutage <span class="opt">facultatif</span></label>
-            <input class="input input--sm" id="min-${d.key}" data-f="minutage" maxlength="5" inputmode="numeric" value="${esc(d.minutage)}" placeholder="06:40">
-          </div>
-          <div class="field">
-            <label class="field__label" for="aut-${d.key}">Auteur <span class="opt">facultatif</span></label>
-            <input class="input input--sm" id="aut-${d.key}" data-f="auteur" maxlength="40" value="${esc(d.auteur)}" placeholder="Marin">
-          </div>
+        ${cfg.extras ? `<div class="field">
+          <label class="field__label" for="aut-${d.key}">Auteur <span class="opt">facultatif</span></label>
+          <input class="input input--sm" id="aut-${d.key}" data-f="auteur" maxlength="40" value="${esc(d.auteur)}" placeholder="Marin">
         </div>` : ''}
         <div class="dr__order">
           <button type="button" data-dr="up" aria-label="Monter ${cfg.the(i + 1)}" ${i === 0 ? 'disabled' : ''}>↑</button>
@@ -694,7 +687,7 @@ function imageList(cfg) {
     fieldError(cfg.err, rejected.length ? `Pas ajouté : ${rejected.join(', ')}.` : null);
     if (!ok.length) return;
     state.dirty = true;
-    const items = ok.map((file, i) => ({ key: `${cfg.prefix}n${Date.now()}-${i}`, file, url: '', legende: '', minutage: '', auteur: '', status: 'prep' }));
+    const items = ok.map((file, i) => ({ key: `${cfg.prefix}n${Date.now()}-${i}`, file, url: '', legende: '', auteur: '', status: 'prep' }));
     L.items.push(...items);
     L.render();
     for (const d of items) {
@@ -790,14 +783,12 @@ function imageList(cfg) {
   });
   listEl.addEventListener('dragend', () => { dragKey = null; lis().forEach((x) => x.classList.remove('is-dragging', 'is-target')); });
 
-  // Erreurs : légende manquante (et minutage mal écrit pour les dessins)
+  // Erreur : légende manquante
   L.markErrors = () => {
     L.items.forEach((d) => {
       const li = $(`.dr[data-key="${d.key}"]`, listEl);
       if (!li) return;
       $('[data-f="legende"]', li).setAttribute('aria-invalid', d.legende.trim() ? 'false' : 'true');
-      const m = $('[data-f="minutage"]', li);
-      if (m) m.setAttribute('aria-invalid', d.minutage.trim() && !/^\d{1,2}:[0-5]\d$/.test(d.minutage.trim()) ? 'true' : 'false');
     });
   };
   return L;

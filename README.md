@@ -66,7 +66,7 @@ Côté sécurité :
 5. Pour un **dessin radio-dessiné** :
    - ajoute les dessins (JPG ou PNG, 10 Mo max, 12 max). Ils sont compressés dans le téléphone avant l'envoi (2000 px, JPG qualité 85) et tu vois l'aperçu tout de suite ;
    - donne une **légende** à chaque dessin (obligatoire : elle décrit le dessin à ceux qui ne le voient pas) ;
-   - le **minutage** (ex. `06:40`) et l'**auteur** sont facultatifs ;
+   - l'**auteur** est facultatif ;
    - change l'ordre avec ↑ ↓, ou en glissant les vignettes.
 6. Appuie sur **PUBLIER**. L'admin envoie les dessins, puis fait **un seul commit** (« Ajout épisode : <titre> »). L'écran « Publié ! » indique quand l'épisode est en ligne, en général au bout d'une minute environ.
 
@@ -148,7 +148,7 @@ vercel.json, robots.txt, .vercelignore
     { "src": "images/slides/le-dragon-qui-avait-peur-du-noir/01-7c3e1a.jpg", "legende": "Couverture « Émission radio-dessinée n° 004 »" }
   ],
   "dessins": [
-    { "src": "images/dessins/le-dragon-qui-avait-peur-du-noir/01-a1b2c3.jpg", "legende": "Le dragon dans sa grotte", "minutage": "01:05", "auteur": "Marin" }
+    { "src": "images/dessins/le-dragon-qui-avait-peur-du-noir/01-a1b2c3.jpg", "legende": "Le dragon dans sa grotte", "auteur": "Marin" }
   ]
 }
 ```
@@ -157,7 +157,7 @@ vercel.json, robots.txt, .vercelignore
 - Facultatifs : `duree`, `auteurs`, `pochette` (image carrée), `slides`, `dessins`.
 - Pour chaque slide (`slides`) : `src` et `legende` sont obligatoires ; la légende décrit la slide à ceux qui ne la voient pas. Images en 16:9, 2000 px de large, JPG qualité 85, rangées dans `images/slides/<id-épisode>/01-xxxxxx.jpg`, `02-…` dans l'ordre. Sur la page de l'épisode, la section « Les slides » (au-dessus des dessins) montre une slide à la fois : flèches, clavier ← →, swipe sur mobile, clic pour agrandir.
 - Un épisode « Dessin radio-dessiné » doit avoir au moins un dessin **ou** des slides.
-- Pour chaque dessin, `src` et `legende` sont obligatoires ; `minutage` et `auteur` sont facultatifs. L'ordre de la galerie suit l'ordre de la liste, et l'orientation se lit sur l'image.
+- Pour chaque dessin, `src` et `legende` sont obligatoires ; `auteur` est facultatif. L'ordre de la galerie suit l'ordre de la liste, et l'orientation se lit sur l'image.
 - L'épisode n° 1 porte la bande « 1ER ÉPISODE », le plus récent la bande « NOUVEL ÉPISODE ».
 
 ### Tester en local

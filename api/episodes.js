@@ -77,11 +77,6 @@ function validate(input, { id, existing }) {
     ep.dessins = list.slice(0, 12).map((d, i) => {
       const out = { src: '', legende: str(d.legende, 120) };
       if (!out.legende) errors.dessins = errors.dessins || 'Chaque dessin a besoin d\'une légende (elle décrit le dessin à ceux qui ne le voient pas).';
-      const minutage = str(d.minutage, 8);
-      if (minutage) {
-        if (!/^\d{1,2}:[0-5]\d$/.test(minutage)) errors.dessins = errors.dessins || 'Le minutage s\'écrit en minutes:secondes, par exemple 06:40.';
-        out.minutage = minutage;
-      }
       const auteur = str(d.auteur, 40); if (auteur) out.auteur = auteur;
       if (typeof d.upload === 'string' && /^[0-9a-f]{40}$/.test(d.upload)) {
         out.src = `images/dessins/${id}/${String(i + 1).padStart(2, '0')}-${crypto.randomBytes(3).toString('hex')}.jpg`;

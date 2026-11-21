@@ -38,7 +38,7 @@ function gallery(ep) {
             <span class="tape tape--${TAPES[i % 3]}" aria-hidden="true"></span>
           </div>
         </button>
-        <figcaption>${x.minutage ? `<span class="timestamp"><span aria-hidden="true">▶ </span><span class="sr-only">À </span>${esc(x.minutage)}</span>` : ''}<span>${esc(x.legende)}</span>${x.auteur ? `<span class="drawing__by">· ${esc(x.auteur)}</span>` : ''}</figcaption>
+        <figcaption><span>${esc(x.legende)}</span>${x.auteur ? `<span class="drawing__by">· ${esc(x.auteur)}</span>` : ''}</figcaption>
       </figure>`).join('');
   return `
   <section class="container container--wide" style="padding-top:clamp(48px,6vw,80px)" aria-labelledby="drawings-title">
@@ -46,7 +46,7 @@ function gallery(ep) {
       ${waves([[420, .16], [760, .09]])}
       <div class="drawings-block__head">
         <h2 class="h2" id="drawings-title">LES DESSINS</h2>
-        <p>Lance l'épisode, puis suis les dessins : chacun indique le moment où il apparaît. Touche un dessin pour l'agrandir.</p>
+        <p>Lance l'épisode et regarde les dessins pendant l'écoute. Touche un dessin pour l'agrandir.</p>
       </div>
       <div class="gallery">${items}</div>
     </div>
