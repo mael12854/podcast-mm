@@ -281,3 +281,11 @@ body.admin { background: var(--dm-night); }
 .pending__actions { display: flex; flex-wrap: wrap; gap: var(--dm-space-2); }
 .pill-btn--ok { border-color: color-mix(in srgb, var(--dm-success) 60%, transparent); }
 .pill-btn--ok:hover { border-color: var(--dm-success); }
+
+/* ---------- Slides : vignettes 16:9 ---------- */
+.dr--wide { grid-template-columns: 176px 1fr; }
+.dr--wide .dr__thumb { aspect-ratio: 16 / 9; }
+@media (max-width: 479px) {
+  .dr--wide { grid-template-columns: 1fr; }
+  .dr--wide .dr__thumb { width: min(100%, 240px); }
+}

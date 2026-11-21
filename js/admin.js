@@ -10,6 +10,7 @@ const CATS = {
 const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
 const SPOTIFY_RE = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?episode\/[A-Za-z0-9]+/;
 const MAX_FILES = 12;
+const MAX_SLIDES = 30;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -33,7 +34,6 @@ const state = {
   view: null,
   confirmId: null,
   editId: null,
-  drawings: [],
   cover: null,
   busy: false,
   dirty: false,
@@ -113,13 +113,25 @@ function leaveFormOk() {
   return window.confirm('Quitter sans publier ? Tes modifications seront perdues.');
 }
 
-document.addEventListener('click', (e) => {
+async function refreshEpisodes() {
+  try {
+    const data = await api('GET', '/api/episodes');
+    state.episodes = data.episodes;
+    state.version = data.version;
+  } catch { /* la liste sera rechargée plus tard ; une erreur de version reste gérée à l'envoi */ }
+}
+
+document.addEventListener('click', async (e) => {
   const go = e.target.closest('[data-go]')?.dataset.go;
   if (!go) return;
   e.preventDefault();
   if (!leaveFormOk()) return;
   if (go === 'list') { stopPolling(); show('list'); loadList(); }
-  if (go === 'new') { stopPolling(); openForm(null); }
+  if (go === 'new') {
+    stopPolling();
+    if (state.view === 'done') await refreshEpisodes();
+    openForm(null);
+  }
 });
 
 window.addEventListener('beforeunload', (e) => {
@@ -389,8 +401,6 @@ function setCategory(cat) {
 
 function openForm(ep) {
   state.editId = ep ? ep.id : null;
-  state.drawings.forEach((d) => d.file && URL.revokeObjectURL(d.url));
-  state.drawings = (ep?.dessins || []).map((d, i) => ({ key: `e${i}-${Date.now()}`, src: d.src, url: '/' + d.src, legende: d.legende || '', minutage: d.minutage || '', auteur: d.auteur || '' }));
   if (state.cover && state.cover.blob) URL.revokeObjectURL(state.cover.url);
   state.cover = ep?.pochette ? { src: ep.pochette, url: '/' + ep.pochette } : null;
   form.reset();
@@ -408,7 +418,8 @@ function openForm(ep) {
   clearErrors();
   formError(null);
   updateDescCount();
-  renderDrawings();
+  drawingsList.load(ep?.dessins);
+  slidesList.load(ep?.slides);
   renderCover();
   state.dirty = false;
   show('form');
@@ -435,7 +446,7 @@ function fieldError(name, msg) {
   if (name === 'spotifyUrl') $('#spotify-help').hidden = !!msg;
 }
 
-function clearErrors() { ['titre', 'date', 'categorie', 'description', 'spotifyUrl', 'pochette', 'dessins'].forEach((n) => fieldError(n, null)); $$('.dr .input').forEach((i) => i.setAttribute('aria-invalid', 'false')); }
+function clearErrors() { ['titre', 'date', 'categorie', 'description', 'spotifyUrl', 'pochette', 'slides', 'dessins'].forEach((n) => fieldError(n, null)); $$('.dr .input').forEach((i) => i.setAttribute('aria-invalid', 'false')); }
 
 function formError(message, actionLabel, soft) {
   const box = $('#form-error');
@@ -476,11 +487,15 @@ function validate(ep) {
   if (!ep.description) errs.description = "Écris quelques lignes pour présenter l'épisode.";
   if (!SPOTIFY_RE.test(ep.spotifyUrl)) errs.spotifyUrl = 'Ce lien ne mène pas à un épisode. Il doit commencer par https://open.spotify.com/episode/';
   if (state.cover && state.cover.status === 'prep') errs.pochette = 'Attends la fin de la préparation de la pochette.';
+  const slides = slidesList.items;
+  if (slides.some((d) => d.status === 'prep')) errs.slides = 'Attends la fin de la préparation des slides.';
+  else if (slides.some((d) => !d.legende.trim())) errs.slides = 'Chaque slide a besoin d\'une légende (elle décrit la slide à ceux qui ne la voient pas).';
   if (ep.categorie === 'dessin') {
-    if (!state.drawings.length) errs.dessins = 'Ajoute au moins un dessin pour un épisode radio-dessiné.';
-    else if (state.drawings.some((d) => d.status === 'prep')) errs.dessins = 'Attends la fin de la préparation des dessins.';
-    else if (state.drawings.some((d) => !d.legende.trim())) errs.dessins = 'Chaque dessin a besoin d\'une légende (elle décrit le dessin à ceux qui ne le voient pas).';
-    else if (state.drawings.some((d) => d.minutage.trim() && !/^\d{1,2}:[0-5]\d$/.test(d.minutage.trim()))) errs.dessins = 'Le minutage s\'écrit en minutes:secondes, par exemple 06:40.';
+    const drawings = drawingsList.items;
+    if (!drawings.length && !slides.length) errs.dessins = 'Ajoute au moins un dessin (ou des slides) pour un épisode radio-dessiné.';
+    else if (drawings.some((d) => d.status === 'prep')) errs.dessins = 'Attends la fin de la préparation des dessins.';
+    else if (drawings.some((d) => !d.legende.trim())) errs.dessins = 'Chaque dessin a besoin d\'une légende (elle décrit le dessin à ceux qui ne le voient pas).';
+    else if (drawings.some((d) => d.minutage.trim() && !/^\d{1,2}:[0-5]\d$/.test(d.minutage.trim()))) errs.dessins = 'Le minutage s\'écrit en minutes:secondes, par exemple 06:40.';
   }
   return errs;
 }
@@ -488,14 +503,8 @@ function validate(ep) {
 function showErrors(errs) {
   clearErrors();
   Object.entries(errs).forEach(([k, v]) => fieldError(k, v));
-  if (errs.dessins) {
-    state.drawings.forEach((d) => {
-      const li = $(`.dr[data-key="${d.key}"]`);
-      if (!li) return;
-      $('[data-f="legende"]', li).setAttribute('aria-invalid', d.legende.trim() ? 'false' : 'true');
-      $('[data-f="minutage"]', li).setAttribute('aria-invalid', d.minutage.trim() && !/^\d{1,2}:[0-5]\d$/.test(d.minutage.trim()) ? 'true' : 'false');
-    });
-  }
+  if (errs.dessins) drawingsList.markErrors();
+  if (errs.slides) slidesList.markErrors();
   const n = Object.keys(errs).length;
   formError(`${n > 1 ? `${n} champs sont à corriger` : 'Un champ est à corriger'} (en rouge). Rien n'est perdu, corrige et republie.`);
 }
@@ -521,12 +530,17 @@ form.addEventListener('submit', async (e) => {
   clearErrors();
 
   const isDessin = ep.categorie === 'dessin';
-  const toUpload = isDessin ? state.drawings.filter((d) => d.blob && !d.upload) : [];
+  const drawingsUp = isDessin ? drawingsList.items.filter((d) => d.blob && !d.upload) : [];
+  const slidesUp = slidesList.items.filter((d) => d.blob && !d.upload);
+  const toUpload = [...slidesUp, ...drawingsUp];
   const coverToUpload = state.cover && state.cover.blob && !state.cover.upload ? state.cover : null;
-  const n = toUpload.length;
-  setBusy(true, n
-    ? `On envoie ${n} dessin${n > 1 ? 's' : ''}${coverToUpload ? ' et la pochette' : ''}, ne ferme pas la page.`
-    : (coverToUpload ? 'On envoie la pochette, ne ferme pas la page.' : 'Ça prend quelques secondes.'));
+  const parts = [];
+  if (drawingsUp.length) parts.push(`${drawingsUp.length} dessin${drawingsUp.length > 1 ? 's' : ''}`);
+  if (slidesUp.length) parts.push(`${slidesUp.length} slide${slidesUp.length > 1 ? 's' : ''}`);
+  if (coverToUpload) parts.push('la pochette');
+  setBusy(true, parts.length
+    ? `On envoie ${parts.length > 1 ? parts.slice(0, -1).join(', ') + ' et ' + parts.at(-1) : parts[0]}, ne ferme pas la page.`
+    : 'Ça prend quelques secondes.');
   try {
     if (coverToUpload) coverToUpload.upload = await uploadDrawing(coverToUpload);
     for (const d of toUpload) {
@@ -535,7 +549,8 @@ form.addEventListener('submit', async (e) => {
     }
     $('#loading-msg').textContent = 'On enregistre l\'épisode…';
     ep.pochette = state.cover ? (state.cover.upload ? { upload: state.cover.upload } : { src: state.cover.src }) : null;
-    ep.dessins = isDessin ? state.drawings.map((d) => ({
+    ep.slides = slidesList.items.map((d) => ({ ...(d.upload ? { upload: d.upload } : { src: d.src }), legende: d.legende.trim() }));
+    ep.dessins = isDessin ? drawingsList.items.map((d) => ({
       ...(d.upload ? { upload: d.upload } : { src: d.src }),
       legende: d.legende.trim(), minutage: d.minutage.trim(), auteur: d.auteur.trim(),
     })) : [];
@@ -547,7 +562,7 @@ form.addEventListener('submit', async (e) => {
     showDone(res.episode, !state.editId);
   } catch (ex) {
     setBusy(false);
-    state.drawings.forEach((d) => setProgress(d, null));
+    [...drawingsList.items, ...slidesList.items].forEach((d) => setProgress(d, null));
     if (ex.code === 'session') return;
     if (ex.fields) { showErrors(ex.fields); return; }
     if (ex.code === 'network') {
@@ -611,19 +626,32 @@ $('#cover-remove').addEventListener('click', () => {
   coverInput.focus();
 });
 
-// ---------- Dessins : ajout, aperçu, compression, ordre ----------
-const drop = $('#drop');
-const fileInput = $('#f-files');
+// ---------- Listes d'images : dessins et slides (ajout, aperçu, compression, ordre) ----------
+// Une seule mécanique pour les deux blocs : chaque image est compressée dans le navigateur,
+// a une légende obligatoire, et se réordonne avec ↑ ↓ (ou en glissant la vignette).
+function imageList(cfg) {
+  const L = { items: [] };
+  const listEl = $(cfg.list);
+  const input = $(cfg.input);
+  const drop = $(cfg.drop);
+  const keyOf = (el) => el.closest('.dr').dataset.key;
+  const lis = () => $$('.dr', listEl);
 
-function renderDrawings() {
-  $('#draw-count').textContent = `${state.drawings.length} / ${MAX_FILES}`;
-  const n = state.drawings.length;
-  $('#drawings').innerHTML = state.drawings.map((d, i) => `
-    <li class="dr" data-key="${d.key}">
+  L.load = (arr) => {
+    L.items.forEach((d) => d.file && d.url && URL.revokeObjectURL(d.url));
+    L.items = (arr || []).map((d, i) => ({ key: `${cfg.prefix}e${i}-${Date.now()}`, src: d.src, url: '/' + d.src, legende: d.legende || '', minutage: d.minutage || '', auteur: d.auteur || '' }));
+    L.render();
+  };
+
+  L.render = () => {
+    $(cfg.count).textContent = `${L.items.length} / ${cfg.max}`;
+    const n = L.items.length;
+    listEl.innerHTML = L.items.map((d, i) => `
+    <li class="dr ${cfg.wide ? 'dr--wide' : ''}" data-key="${d.key}">
       <div class="dr__thumb" draggable="true" title="Glisse pour changer l'ordre">
         ${d.url ? `<img src="${esc(d.url)}" alt="">` : '<div class="paper__hatch"></div>'}
         <span class="dr__n" aria-hidden="true">${i + 1}</span>
-        <button class="dr__remove" type="button" data-dr="remove" aria-label="Retirer le dessin ${i + 1}">✕</button>
+        <button class="dr__remove" type="button" data-dr="remove" aria-label="Retirer ${cfg.the(i + 1)}">✕</button>
         <div class="dr__progress" ${d.status === 'prep' || d.pct != null ? '' : 'hidden'}>
           <span class="dr__bar"><i style="width:${d.pct || 0}%"></i></span>
           <span class="dr__pct">${d.status === 'prep' ? 'Préparation…' : `${d.pct || 0} %`}</span>
@@ -631,10 +659,10 @@ function renderDrawings() {
       </div>
       <div class="dr__fields">
         <div class="field">
-          <label class="field__label" for="leg-${d.key}">Légende du dessin ${i + 1}</label>
-          <input class="input input--sm" id="leg-${d.key}" data-f="legende" maxlength="120" value="${esc(d.legende)}" placeholder="Ex. : Le dragon dans sa grotte">
+          <label class="field__label" for="leg-${d.key}">Légende ${cfg.of(i + 1)}</label>
+          <input class="input input--sm" id="leg-${d.key}" data-f="legende" maxlength="${cfg.legendMax}" value="${esc(d.legende)}" placeholder="${esc(cfg.placeholder)}">
         </div>
-        <div class="grid-2">
+        ${cfg.extras ? `<div class="grid-2">
           <div class="field">
             <label class="field__label" for="min-${d.key}">Minutage <span class="opt">facultatif</span></label>
             <input class="input input--sm" id="min-${d.key}" data-f="minutage" maxlength="5" inputmode="numeric" value="${esc(d.minutage)}" placeholder="06:40">
@@ -643,15 +671,139 @@ function renderDrawings() {
             <label class="field__label" for="aut-${d.key}">Auteur <span class="opt">facultatif</span></label>
             <input class="input input--sm" id="aut-${d.key}" data-f="auteur" maxlength="40" value="${esc(d.auteur)}" placeholder="Marin">
           </div>
-        </div>
+        </div>` : ''}
         <div class="dr__order">
-          <button type="button" data-dr="up" aria-label="Monter le dessin ${i + 1}" ${i === 0 ? 'disabled' : ''}>↑</button>
-          <button type="button" data-dr="down" aria-label="Descendre le dessin ${i + 1}" ${i === n - 1 ? 'disabled' : ''}>↓</button>
+          <button type="button" data-dr="up" aria-label="Monter ${cfg.the(i + 1)}" ${i === 0 ? 'disabled' : ''}>↑</button>
+          <button type="button" data-dr="down" aria-label="Descendre ${cfg.the(i + 1)}" ${i === n - 1 ? 'disabled' : ''}>↓</button>
         </div>
       </div>
     </li>`).join('');
+  };
+
+  L.addFiles = async (list) => {
+    const files = [...(list || [])];
+    const rejected = [];
+    const room = cfg.max - L.items.length;
+    const ok = [];
+    for (const f of files) {
+      if (!/^image\/(jpeg|png)$/.test(f.type)) rejected.push(`${f.name} (ni JPG ni PNG)`);
+      else if (f.size > MAX_FILE_BYTES) rejected.push(`${f.name} (plus de 10 Mo)`);
+      else if (ok.length >= room) rejected.push(`${f.name} (${cfg.max} ${cfg.plural} maximum)`);
+      else ok.push(f);
+    }
+    fieldError(cfg.err, rejected.length ? `Pas ajouté : ${rejected.join(', ')}.` : null);
+    if (!ok.length) return;
+    state.dirty = true;
+    const items = ok.map((file, i) => ({ key: `${cfg.prefix}n${Date.now()}-${i}`, file, url: '', legende: '', minutage: '', auteur: '', status: 'prep' }));
+    L.items.push(...items);
+    L.render();
+    for (const d of items) {
+      try {
+        const out = await compressImage(d.file);
+        d.blob = out.blob;
+        d.url = URL.createObjectURL(out.blob); // aperçu = l'image exacte qui sera envoyée
+        d.status = 'ready';
+      } catch {
+        L.items = L.items.filter((x) => x !== d);
+        fieldError(cfg.err, `Impossible de lire ${d.file.name}. Essaie avec un autre fichier.`);
+      }
+      // on remet à jour seulement la vignette, pour ne pas perdre la saisie en cours
+      const li = $(`.dr[data-key="${d.key}"]`, listEl);
+      if (li && d.url) {
+        $('.dr__thumb', li).insertAdjacentHTML('afterbegin', `<img src="${esc(d.url)}" alt="">`);
+        $('.paper__hatch', li)?.remove();
+        setProgress(d, null);
+      } else {
+        L.render();
+      }
+    }
+  };
+
+  function move(from, to, focusSel) {
+    if (to < 0 || to >= L.items.length) return;
+    const [d] = L.items.splice(from, 1);
+    L.items.splice(to, 0, d);
+    state.dirty = true;
+    L.render();
+    if (focusSel) {
+      const li = $(`.dr[data-key="${d.key}"]`, listEl);
+      const target = $(focusSel, li);
+      (target && !target.disabled ? target : $('[data-dr="up"]:not(:disabled), [data-dr="down"]:not(:disabled)', li))?.focus();
+    }
+  }
+
+  input.addEventListener('change', () => { L.addFiles(input.files); input.value = ''; });
+  drop.addEventListener('dragover', (e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); drop.classList.add('is-over'); } });
+  drop.addEventListener('dragleave', () => drop.classList.remove('is-over'));
+  drop.addEventListener('drop', (e) => {
+    if (!e.dataTransfer.files.length) return;
+    e.preventDefault(); drop.classList.remove('is-over'); L.addFiles(e.dataTransfer.files);
+  });
+
+  listEl.addEventListener('input', (e) => {
+    const f = e.target.dataset.f;
+    if (!f) return;
+    const d = L.items.find((x) => x.key === keyOf(e.target));
+    if (d) d[f] = e.target.value;
+    e.target.setAttribute('aria-invalid', 'false');
+  });
+  listEl.addEventListener('click', (e) => {
+    const act = e.target.closest('[data-dr]')?.dataset.dr;
+    if (!act) return;
+    const i = L.items.findIndex((x) => x.key === keyOf(e.target));
+    if (act === 'remove') {
+      const [d] = L.items.splice(i, 1);
+      if (d.file && d.url) URL.revokeObjectURL(d.url);
+      state.dirty = true;
+      L.render();
+      const next = lis()[Math.min(i, L.items.length - 1)];
+      (next ? $('[data-dr="remove"]', next) : input).focus();
+    }
+    if (act === 'up') move(i, i - 1, '[data-dr="up"]');
+    if (act === 'down') move(i, i + 1, '[data-dr="down"]');
+  });
+
+  // Glisser-déposer pour réordonner (souris / tablette)
+  let dragKey = null;
+  listEl.addEventListener('dragstart', (e) => {
+    const li = e.target.closest('.dr');
+    if (!li) return;
+    dragKey = li.dataset.key;
+    li.classList.add('is-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', dragKey);
+  });
+  listEl.addEventListener('dragover', (e) => {
+    if (!dragKey) return;
+    e.preventDefault();
+    lis().forEach((x) => x.classList.remove('is-target'));
+    e.target.closest('.dr')?.classList.add('is-target');
+  });
+  listEl.addEventListener('drop', (e) => {
+    if (!dragKey) return;
+    e.preventDefault();
+    const target = e.target.closest('.dr');
+    const from = L.items.findIndex((x) => x.key === dragKey);
+    const to = target ? L.items.findIndex((x) => x.key === target.dataset.key) : L.items.length - 1;
+    dragKey = null;
+    move(from, to);
+  });
+  listEl.addEventListener('dragend', () => { dragKey = null; lis().forEach((x) => x.classList.remove('is-dragging', 'is-target')); });
+
+  // Erreurs : légende manquante (et minutage mal écrit pour les dessins)
+  L.markErrors = () => {
+    L.items.forEach((d) => {
+      const li = $(`.dr[data-key="${d.key}"]`, listEl);
+      if (!li) return;
+      $('[data-f="legende"]', li).setAttribute('aria-invalid', d.legende.trim() ? 'false' : 'true');
+      const m = $('[data-f="minutage"]', li);
+      if (m) m.setAttribute('aria-invalid', d.minutage.trim() && !/^\d{1,2}:[0-5]\d$/.test(d.minutage.trim()) ? 'true' : 'false');
+    });
+  };
+  return L;
 }
 
+// Barre de progression d'une image en cours d'envoi (clé unique : préfixe d = dessin, s = slide).
 function setProgress(d, pct) {
   d.pct = pct;
   const li = $(`.dr[data-key="${d.key}"]`);
@@ -662,125 +814,28 @@ function setProgress(d, pct) {
   $('.dr__pct', li).textContent = d.status === 'prep' ? 'Préparation…' : `${pct || 0} %`;
 }
 
-async function addFiles(list) {
-  const files = [...(list || [])];
-  const rejected = [];
-  const room = MAX_FILES - state.drawings.length;
-  const ok = [];
-  for (const f of files) {
-    if (!/^image\/(jpeg|png)$/.test(f.type)) rejected.push(`${f.name} (ni JPG ni PNG)`);
-    else if (f.size > MAX_FILE_BYTES) rejected.push(`${f.name} (plus de 10 Mo)`);
-    else if (ok.length >= room) rejected.push(`${f.name} (12 dessins maximum)`);
-    else ok.push(f);
-  }
-  fieldError('dessins', rejected.length ? `Pas ajouté : ${rejected.join(', ')}.` : null);
-  if (!ok.length) return;
-  state.dirty = true;
-  const items = ok.map((file, i) => ({ key: `n${Date.now()}-${i}`, file, url: '', legende: '', minutage: '', auteur: '', status: 'prep' }));
-  state.drawings.push(...items);
-  renderDrawings();
-  for (const d of items) {
-    try {
-      const out = await compressImage(d.file);
-      d.blob = out.blob;
-      d.url = URL.createObjectURL(out.blob); // aperçu = l'image exacte qui sera envoyée
-      d.status = 'ready';
-    } catch {
-      state.drawings = state.drawings.filter((x) => x !== d);
-      fieldError('dessins', `Impossible de lire ${d.file.name}. Essaie avec un autre fichier.`);
-    }
-    // on remet à jour seulement la vignette, pour ne pas perdre la saisie en cours
-    const li = $(`.dr[data-key="${d.key}"]`);
-    if (li && d.url) {
-      $('.dr__thumb', li).insertAdjacentHTML('afterbegin', `<img src="${esc(d.url)}" alt="">`);
-      $('.paper__hatch', li)?.remove();
-      setProgress(d, null);
-    } else if (!li || !d.url) {
-      renderDrawings();
-    }
-  }
-}
-
-fileInput.addEventListener('change', () => { addFiles(fileInput.files); fileInput.value = ''; });
-drop.addEventListener('dragover', (e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); drop.classList.add('is-over'); } });
-drop.addEventListener('dragleave', () => drop.classList.remove('is-over'));
-drop.addEventListener('drop', (e) => {
-  if (!e.dataTransfer.files.length) return;
-  e.preventDefault(); drop.classList.remove('is-over'); addFiles(e.dataTransfer.files);
+const drawingsList = imageList({
+  prefix: 'd', list: '#drawings', input: '#f-files', drop: '#drop', count: '#draw-count', err: 'dessins',
+  max: MAX_FILES, plural: 'dessins', extras: true, wide: false, legendMax: 120,
+  placeholder: 'Ex. : Le dragon dans sa grotte',
+  the: (n) => `le dessin ${n}`, of: (n) => `du dessin ${n}`,
 });
-
-function move(from, to, focusSel) {
-  if (to < 0 || to >= state.drawings.length) return;
-  const [d] = state.drawings.splice(from, 1);
-  state.drawings.splice(to, 0, d);
-  state.dirty = true;
-  renderDrawings();
-  if (focusSel) {
-    const li = $(`.dr[data-key="${d.key}"]`);
-    const target = $(focusSel, li);
-    (target && !target.disabled ? target : $('[data-dr="up"]:not(:disabled), [data-dr="down"]:not(:disabled)', li))?.focus();
-  }
-}
-
-const drawingsEl = $('#drawings');
-drawingsEl.addEventListener('input', (e) => {
-  const f = e.target.dataset.f;
-  if (!f) return;
-  const d = state.drawings.find((x) => x.key === e.target.closest('.dr').dataset.key);
-  if (d) d[f] = e.target.value;
-  e.target.setAttribute('aria-invalid', 'false');
+const slidesList = imageList({
+  prefix: 's', list: '#slides', input: '#f-slides', drop: '#drop-slides', count: '#slides-count', err: 'slides',
+  max: MAX_SLIDES, plural: 'slides', extras: false, wide: true, legendMax: 160,
+  placeholder: 'Ex. : Chronique 1 · Les téléphones aujourd’hui, décortiqués',
+  the: (n) => `la slide ${n}`, of: (n) => `de la slide ${n}`,
 });
-drawingsEl.addEventListener('click', (e) => {
-  const act = e.target.closest('[data-dr]')?.dataset.dr;
-  if (!act) return;
-  const key = e.target.closest('.dr').dataset.key;
-  const i = state.drawings.findIndex((x) => x.key === key);
-  if (act === 'remove') {
-    const [d] = state.drawings.splice(i, 1);
-    if (d.file && d.url) URL.revokeObjectURL(d.url);
-    state.dirty = true;
-    renderDrawings();
-    const next = $$('.dr')[Math.min(i, state.drawings.length - 1)];
-    (next ? $('[data-dr="remove"]', next) : fileInput).focus();
-  }
-  if (act === 'up') move(i, i - 1, '[data-dr="up"]');
-  if (act === 'down') move(i, i + 1, '[data-dr="down"]');
-});
-
-// Glisser-déposer pour réordonner (souris / tablette)
-let dragKey = null;
-drawingsEl.addEventListener('dragstart', (e) => {
-  const li = e.target.closest('.dr');
-  if (!li) return;
-  dragKey = li.dataset.key;
-  li.classList.add('is-dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', dragKey);
-});
-drawingsEl.addEventListener('dragover', (e) => {
-  if (!dragKey) return;
-  e.preventDefault();
-  $$('.dr.is-target').forEach((x) => x.classList.remove('is-target'));
-  e.target.closest('.dr')?.classList.add('is-target');
-});
-drawingsEl.addEventListener('drop', (e) => {
-  if (!dragKey) return;
-  e.preventDefault();
-  const target = e.target.closest('.dr');
-  const from = state.drawings.findIndex((x) => x.key === dragKey);
-  const to = target ? state.drawings.findIndex((x) => x.key === target.dataset.key) : state.drawings.length - 1;
-  dragKey = null;
-  move(from, to);
-});
-drawingsEl.addEventListener('dragend', () => { dragKey = null; $$('.dr').forEach((x) => x.classList.remove('is-dragging', 'is-target')); });
 
 // ---------- Publié ----------
 function stopPolling() { clearTimeout(state.pollTimer); state.pollTimer = null; }
 
 function showDone(ep, isNew) {
   const n = (ep.dessins || []).length;
+  const ns = (ep.slides || []).length;
+  const extras = [n ? `${n} dessin${n > 1 ? 's' : ''}` : '', ns ? `${ns} slide${ns > 1 ? 's' : ''}` : ''].filter(Boolean).join(' et ');
   $('#done-title').textContent = 'Publié !';
-  $('#done-text').textContent = `« ${ep.titre} » est ${isNew ? 'publié' : 'enregistré'}${ep.categorie === 'dessin' && n ? ` avec ${n} dessin${n > 1 ? 's' : ''}` : ''}. Le site sera à jour dans environ 1 minute.`;
+  $('#done-text').textContent = `« ${ep.titre} » est ${isNew ? 'publié' : 'enregistré'}${extras ? ` avec ${extras}` : ''}. Le site sera à jour dans environ 1 minute.`;
   $('#done-recap').innerHTML = `
     <span class="num-tile num-tile--sm" aria-hidden="true">${esc(ep.numero)}</span>
     <div>${badge(ep.categorie)}<span class="meta">${esc(fmtDate(ep.date))} · N° ${esc(ep.numero)}</span></div>`;

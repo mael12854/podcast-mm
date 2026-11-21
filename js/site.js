@@ -125,12 +125,13 @@ export function coverImg(ep, cls, width, sizes) {
 export function renderCard(ep, { level = 3, latestId = null } = {}) {
   const isDessin = ep.categorie === 'dessin';
   const first = isDessin && ep.dessins && ep.dessins[0] ? ep.dessins[0].src : null;
+  const slide0 = isDessin && !first && ep.slides && ep.slides[0] ? ep.slides[0].src : null;
   const h = `h${level}`;
   return `
 <article class="card">
   <div class="card__visual">
     ${waves([[90, .45], [170, .28], [260, .15]], 'waves--thin')}
-    ${ep.pochette ? coverImg(ep, 'card__cover', 320, '120px') : (isDessin ? paperThumb(first, 'card__drawing', 'lavender', 320) : '')}
+    ${ep.pochette ? coverImg(ep, 'card__cover', 320, '120px') : (isDessin ? (slide0 ? paperThumb(slide0, 'card__drawing card__drawing--wide', 'lavender', 384) : paperThumb(first, 'card__drawing', 'lavender', 320)) : '')}
     <div class="card__badges">${catBadge(ep.categorie, 'card')}${specialBadges(ep, { isLatest: ep.id === latestId })}</div>
     ${epNum(ep, 'card__num')}
   </div>

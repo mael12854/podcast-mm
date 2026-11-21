@@ -10,6 +10,7 @@ import { readEpisodes, readJsonList, commitWithRetry, serialize, DATA_PATH, AVIS
 import { readAttente, ATTENTE_PATH } from './_lib/avis-store.js';
 
 const CATS = ['chronique', 'parents', 'dessin'];
+const MAX_SLIDES = 30;
 const SPOTIFY_RE = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?episode\/[A-Za-z0-9]+/;
 
 function slugify(s) {
@@ -48,9 +49,29 @@ function validate(input, { id, existing }) {
   } else if (poch && typeof poch.src === 'string' && existing && poch.src === existing.pochette) {
     ep.pochette = poch.src;
   }
+  // Slides (facultatives, toutes catégories) : { src, legende }, l'ordre est celui de la liste.
+  const slideList = Array.isArray(input.slides) ? input.slides : [];
+  if (slideList.length) {
+    if (slideList.length > MAX_SLIDES) errors.slides = `${MAX_SLIDES} slides maximum par épisode.`;
+    const allowedSlides = new Set((existing?.slides || []).map((d) => d.src));
+    ep.slides = slideList.slice(0, MAX_SLIDES).map((d, i) => {
+      const out = { src: '', legende: str(d.legende, 160) };
+      if (!out.legende) errors.slides = errors.slides || 'Chaque slide a besoin d\'une légende (elle décrit la slide à ceux qui ne la voient pas).';
+      if (typeof d.upload === 'string' && /^[0-9a-f]{40}$/.test(d.upload)) {
+        out.src = `images/slides/${id}/${String(i + 1).padStart(2, '0')}-${crypto.randomBytes(3).toString('hex')}.jpg`;
+        add.push({ path: out.src, sha: d.upload });
+      } else if (typeof d.src === 'string' && allowedSlides.has(d.src)) {
+        out.src = d.src;
+      } else {
+        errors.slides = errors.slides || 'Une des slides est introuvable. Retire-la et ajoute-la à nouveau.';
+      }
+      return out;
+    });
+  }
+
   if (ep.categorie === 'dessin') {
     const list = Array.isArray(input.dessins) ? input.dessins : [];
-    if (!list.length) errors.dessins = 'Ajoute au moins un dessin pour un épisode radio-dessiné.';
+    if (!list.length && !slideList.length) errors.dessins = 'Ajoute au moins un dessin (ou des slides) pour un épisode radio-dessiné.';
     if (list.length > 12) errors.dessins = '12 dessins maximum par épisode.';
     const allowed = new Set((existing?.dessins || []).map((d) => d.src));
     ep.dessins = list.slice(0, 12).map((d, i) => {
@@ -82,9 +103,9 @@ function validate(input, { id, existing }) {
 }
 
 const sortList = (list) => [...list].sort((a, b) => String(b.date).localeCompare(String(a.date)) || Number(b.numero) - Number(a.numero));
-// Images rattachées à un épisode (dessins + pochette) : supprimées avec lui ou quand on les remplace.
-const drawingPaths = (ep) => [...(ep?.dessins || []).map((d) => d.src), ep?.pochette]
-  .filter((s) => typeof s === 'string' && (s.startsWith('images/dessins/') || s.startsWith('images/pochettes/')));
+// Images rattachées à un épisode (dessins, slides, pochette) : supprimées avec lui ou quand on les remplace.
+const drawingPaths = (ep) => [...(ep?.dessins || []).map((d) => d.src), ...(ep?.slides || []).map((d) => d.src), ep?.pochette]
+  .filter((s) => typeof s === 'string' && /^images\/(dessins|slides|pochettes)\//.test(s));
 
 function checkVersion(current, version) {
   if (!version || version !== current.version) {

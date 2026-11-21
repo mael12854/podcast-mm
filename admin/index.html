@@ -144,6 +144,19 @@
         <p class="err" id="e-pochette" hidden></p>
       </div>
 
+      <div class="field">
+        <span class="field__label"><span id="l-slides">Slides <span class="opt">facultatif</span></span> <span class="field__count" id="slides-count">0 / 30</span></span>
+        <label class="drop" id="drop-slides">
+          <input type="file" id="f-slides" accept="image/jpeg,image/png" multiple aria-describedby="slides-help e-slides">
+          <span class="drop__plus" aria-hidden="true">+</span>
+          <strong>Ajoute les slides de l’émission</strong>
+          <span id="slides-help">Glisse-les ici ou <span class="fake-link">choisis des fichiers</span><br>Une image par slide (16:9) · JPG ou PNG · 10 Mo max · 30 slides max</span>
+        </label>
+        <p class="err" id="e-slides" hidden></p>
+        <ol class="drawings" id="slides" aria-labelledby="l-slides"></ol>
+        <p class="field__help">Exporte ta présentation en PDF puis en images, ou fais une capture par slide. Utilise ↑ ↓ pour l’ordre. La légende décrit la slide à ceux qui ne la voient pas.</p>
+      </div>
+
       <div class="field" id="drawings-field" hidden>
         <span class="field__label" id="l-dessins">Dessins <span class="field__count" id="draw-count">0 / 12</span></span>
         <label class="drop" id="drop">
