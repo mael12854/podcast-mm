@@ -1,40 +1,40 @@
 [
   {
-    "id": "episode-004-emission-radio-dessinee",
+    "id": "on-a-ouvert-les-telephones-marin-a-dompte-minecraft",
     "numero": 4,
-    "titre": "Épisode #004 : Émission radio-dessinée",
+    "titre": "On a ouvert les téléphones, Marin a dompté Minecraft",
     "date": "2026-11-21",
     "categorie": "dessin",
-    "description": "Notre première émission radio-dessinée : écoute, et fais défiler les slides en même temps !\n\nAu programme : les téléphones aujourd’hui, décortiqués (au sens figuré, bien sûr) ; comment jouer à Minecraft, avec Marin ; les actualités de la famille ; et les livres du moment.\n\n🔗 Le site de Double M : https://podcast-mm.vercel.app",
+    "description": "Nouvelle formule : Double M passe en radio-dessinée ! Cette fois, tu écoutes ET tu regardes les slides et les dessins 🎙️✏️\n\n4 chroniques au programme :\n📱 Les téléphones aujourd'hui, décortiqués (au sens figuré bien sûr !!!) : écran, batterie, appareil photo… on regarde ce qu'il y a vraiment dedans, et qui les fabrique.\n⛏️ Comment jouer à Minecraft ? Marin prend le micro tout seul pour t'apprendre à passer ta première nuit sans te faire manger par un creeper 💥\n📺 Les actualités de la famille, présentées comme au JT, avec les dernières nouvelles de Poké Ma-Ma 🍱\n📚 Les livres du moment : ceux qui traînent sur la table de nuit, et ceux qu'on te conseille.\n\nLes slides de l'épisode sont sur le site, pour les suivre pendant l'écoute 👀 Et n'oublie pas de laisser ton avis ⭐\n\n🔗 Les liens de l'épisode :\n📄 Le programme de l'émission : https://tinyurl.com/doublem004photos\n🍱 Poké Ma-Ma : https://poke-mamma.vercel.app\n🖼️ Double M sur Flickr : https://www.flickr.com/photos/doublemradio\n📻 Le site de Double M (slides + avis) : https://podcast-mm.vercel.app",
     "spotifyUrl": "",
     "auteurs": "Maël & Marin",
     "slides": [
       {
-        "src": "images/slides/episode-004-emission-radio-dessinee/01-ede9f1.jpg",
+        "src": "images/slides/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/01-ede9f1.jpg",
         "legende": "Couverture « Émission radio-dessinée n° 004 »"
       },
       {
-        "src": "images/slides/episode-004-emission-radio-dessinee/02-e752d9.jpg",
+        "src": "images/slides/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/02-e752d9.jpg",
         "legende": "Au programme : les 4 chroniques"
       },
       {
-        "src": "images/slides/episode-004-emission-radio-dessinee/03-87261a.jpg",
+        "src": "images/slides/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/03-87261a.jpg",
         "legende": "Chronique 1 · Les téléphones aujourd’hui, décortiqués"
       },
       {
-        "src": "images/slides/episode-004-emission-radio-dessinee/04-51f998.jpg",
+        "src": "images/slides/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/04-51f998.jpg",
         "legende": "Chronique 2 · Comment jouer à Minecraft ?"
       },
       {
-        "src": "images/slides/episode-004-emission-radio-dessinee/05-51e1b5.jpg",
+        "src": "images/slides/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/05-51e1b5.jpg",
         "legende": "Chronique 3 · Les actualités de la famille"
       },
       {
-        "src": "images/slides/episode-004-emission-radio-dessinee/06-f5b5d1.jpg",
+        "src": "images/slides/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/06-f5b5d1.jpg",
         "legende": "Chronique 4 · Les livres du moment"
       },
       {
-        "src": "images/slides/episode-004-emission-radio-dessinee/07-5b0c07.jpg",
+        "src": "images/slides/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/07-5b0c07.jpg",
         "legende": "Merci d’avoir écouté"
       }
     ],
