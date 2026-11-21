@@ -1,5 +1,46 @@
 [
   {
+    "id": "episode-004-emission-radio-dessinee",
+    "numero": 4,
+    "titre": "Épisode #004 : Émission radio-dessinée",
+    "date": "2026-11-21",
+    "categorie": "dessin",
+    "description": "Notre première émission radio-dessinée : écoute, et fais défiler les slides en même temps !\n\nAu programme : les téléphones aujourd’hui, décortiqués (au sens figuré, bien sûr) ; comment jouer à Minecraft, avec Marin ; les actualités de la famille ; et les livres du moment.\n\n🔗 Le site de Double M : https://podcast-mm.vercel.app",
+    "spotifyUrl": "",
+    "auteurs": "Maël & Marin",
+    "slides": [
+      {
+        "src": "images/slides/episode-004-emission-radio-dessinee/01-ede9f1.jpg",
+        "legende": "Couverture « Émission radio-dessinée n° 004 »"
+      },
+      {
+        "src": "images/slides/episode-004-emission-radio-dessinee/02-e752d9.jpg",
+        "legende": "Au programme : les 4 chroniques"
+      },
+      {
+        "src": "images/slides/episode-004-emission-radio-dessinee/03-87261a.jpg",
+        "legende": "Chronique 1 · Les téléphones aujourd’hui, décortiqués"
+      },
+      {
+        "src": "images/slides/episode-004-emission-radio-dessinee/04-51f998.jpg",
+        "legende": "Chronique 2 · Comment jouer à Minecraft ?"
+      },
+      {
+        "src": "images/slides/episode-004-emission-radio-dessinee/05-51e1b5.jpg",
+        "legende": "Chronique 3 · Les actualités de la famille"
+      },
+      {
+        "src": "images/slides/episode-004-emission-radio-dessinee/06-f5b5d1.jpg",
+        "legende": "Chronique 4 · Les livres du moment"
+      },
+      {
+        "src": "images/slides/episode-004-emission-radio-dessinee/07-5b0c07.jpg",
+        "legende": "Merci d’avoir écouté"
+      }
+    ],
+    "dessins": []
+  },
+  {
     "id": "episode-003-les-dessinateurs",
     "numero": 3,
     "titre": "Épisode #003 : Les dessinateurs",
