@@ -51,7 +51,7 @@ function gallery(ep) {
       <figure class="drawing">
         ${frame}
         <figcaption><span>${esc(x.legende)}</span>${x.auteur ? `<span class="drawing__by">· ${esc(x.auteur)}</span>` : ''}${flickr
-          ? `<a class="drawing__flickr" href="${esc(flickr)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">Voir sur Flickr ↗</a>` : ''}</figcaption>
+          ? `<span class="drawing__flickr" aria-hidden="true">Voir sur Flickr ↗</span>` : ''}</figcaption>
       </figure>`;
   }).join('');
   return `
