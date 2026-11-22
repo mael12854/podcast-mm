@@ -495,7 +495,6 @@ function validate(ep) {
     const drawings = drawingsList.items;
     if (!drawings.length && !slides.length) errs.dessins = 'Ajoute au moins un dessin (ou des slides) pour un épisode radio-dessiné.';
     else if (drawings.some((d) => d.status === 'prep')) errs.dessins = 'Attends la fin de la préparation des dessins.';
-    else if (drawings.some((d) => !d.legende.trim())) errs.dessins = 'Chaque dessin a besoin d\'une légende (elle décrit le dessin à ceux qui ne le voient pas).';
     else if (drawings.some((d) => d.flickr.trim() && !FLICKR_RE.test(d.flickr.trim()))) errs.dessins = 'Le lien Flickr doit commencer par https://www.flickr.com/ ou https://flic.kr/';
   }
   return errs;
@@ -660,7 +659,7 @@ function imageList(cfg) {
       </div>
       <div class="dr__fields">
         <div class="field">
-          <label class="field__label" for="leg-${d.key}">Légende ${cfg.of(i + 1)}</label>
+          <label class="field__label" for="leg-${d.key}">Légende ${cfg.of(i + 1)}${cfg.legendOptional ? ' <span class="opt">facultatif</span>' : ''}</label>
           <input class="input input--sm" id="leg-${d.key}" data-f="legende" maxlength="${cfg.legendMax}" value="${esc(d.legende)}" placeholder="${esc(cfg.placeholder)}">
         </div>
         ${cfg.extras ? `<div class="field">
@@ -794,7 +793,7 @@ function imageList(cfg) {
     L.items.forEach((d) => {
       const li = $(`.dr[data-key="${d.key}"]`, listEl);
       if (!li) return;
-      $('[data-f="legende"]', li).setAttribute('aria-invalid', d.legende.trim() ? 'false' : 'true');
+      $('[data-f="legende"]', li).setAttribute('aria-invalid', cfg.legendOptional || d.legende.trim() ? 'false' : 'true');
       const fl = $('[data-f="flickr"]', li);
       if (fl) fl.setAttribute('aria-invalid', d.flickr.trim() && !FLICKR_RE.test(d.flickr.trim()) ? 'true' : 'false');
     });
@@ -815,7 +814,7 @@ function setProgress(d, pct) {
 
 const drawingsList = imageList({
   prefix: 'd', list: '#drawings', input: '#f-files', drop: '#drop', count: '#draw-count', err: 'dessins',
-  max: MAX_FILES, plural: 'dessins', extras: true, wide: false, legendMax: 120,
+  max: MAX_FILES, plural: 'dessins', extras: true, wide: false, legendMax: 120, legendOptional: true,
   placeholder: 'Ex. : Le dragon dans sa grotte',
   the: (n) => `le dessin ${n}`, of: (n) => `du dessin ${n}`,
 });

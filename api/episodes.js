@@ -77,7 +77,6 @@ function validate(input, { id, existing }) {
     const allowed = new Set((existing?.dessins || []).map((d) => d.src));
     ep.dessins = list.slice(0, 12).map((d, i) => {
       const out = { src: '', legende: str(d.legende, 120) };
-      if (!out.legende) errors.dessins = errors.dessins || 'Chaque dessin a besoin d\'une légende (elle décrit le dessin à ceux qui ne le voient pas).';
       const flickr = str(d.flickr, 200);
       if (flickr) {
         if (!FLICKR_RE.test(flickr)) errors.dessins = errors.dessins || 'Le lien Flickr doit commencer par https://www.flickr.com/ ou https://flic.kr/';

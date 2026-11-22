@@ -26,13 +26,21 @@ function player(ep) {
     loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>`;
 }
 
+// Un dessin sans légende reçoit un texte de remplacement : « Dessin 3 sur 12 ».
+function withLabels(list) {
+  return list.map((x, i) => {
+    const own = (x.legende || '').trim();
+    return { ...x, hasLegende: !!own, legende: own || `Dessin ${i + 1} sur ${list.length}` };
+  });
+}
+
 // Pages Flickr des dessins (compte doublemradio) : seules ces adresses sont acceptées.
 const FLICKR_RE = /^https:\/\/(www\.flickr\.com|flic\.kr)\/\S+$/;
 
 function gallery(ep) {
   const d = (ep.dessins || []).filter((x) => x && x.src);
   if (ep.categorie !== 'dessin' || !d.length) return '';
-  const items = d.map((x, i) => {
+  const items = withLabels(d).map((x, i) => {
     const flickr = FLICKR_RE.test(x.flickr || '') ? x.flickr : '';
     const paper = `<div class="paper">
             <img class="paper__img" src="${esc(imgSrc(x.src, 640))}" ${imgSrcset(x.src, [384, 640, 1080]) ? `srcset="${esc(imgSrcset(x.src, [384, 640, 1080]))}" sizes="(min-width: 760px) 300px, 50vw"` : ''}
@@ -50,8 +58,8 @@ function gallery(ep) {
     return `
       <figure class="drawing">
         ${frame}
-        <figcaption><span>${esc(x.legende)}</span>${x.auteur ? `<span class="drawing__by">· ${esc(x.auteur)}</span>` : ''}${flickr
-          ? `<span class="drawing__flickr" aria-hidden="true">Voir sur Flickr ↗</span>` : ''}</figcaption>
+        ${(x.hasLegende || x.auteur || flickr) ? `<figcaption>${x.hasLegende ? `<span>${esc(x.legende)}</span>` : ''}${x.auteur ? `<span class="drawing__by">· ${esc(x.auteur)}</span>` : ''}${flickr
+          ? `<span class="drawing__flickr" aria-hidden="true">Voir sur Flickr ↗</span>` : ''}</figcaption>` : ''}
       </figure>`;
   }).join('');
   return `
@@ -124,7 +132,7 @@ function render(ep, all) {
     const fit = () => { if (im.naturalWidth) im.closest('.paper').style.setProperty('--ratio', `${im.naturalWidth} / ${im.naturalHeight}`); };
     if (im.complete) fit(); else im.addEventListener('load', fit);
   });
-  const list = (ep.dessins || []).filter((x) => x && x.src);
+  const list = withLabels((ep.dessins || []).filter((x) => x && x.src));
   root.querySelectorAll('button.drawing__btn').forEach((b) => {
     b.addEventListener('click', () => openLightbox(list, Number(b.dataset.i), b));
   });

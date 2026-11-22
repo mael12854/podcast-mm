@@ -65,7 +65,7 @@ Côté sécurité :
 4. **Slides** (facultatif, toutes catégories) : ajoute une image par slide (16:9, JPG ou PNG, 30 max). Comme les dessins, elles sont compressées avant l'envoi ; chaque slide a une **légende obligatoire** ; change l'ordre avec ↑ ↓. Astuce : dans Google Slides, Fichier › Télécharger › PDF, puis une image par page.
 5. Pour un **dessin radio-dessiné** :
    - ajoute les dessins (JPG ou PNG, 10 Mo max, 12 max). Ils sont compressés dans le téléphone avant l'envoi (2000 px, JPG qualité 85) et tu vois l'aperçu tout de suite ;
-   - donne une **légende** à chaque dessin (obligatoire : elle décrit le dessin à ceux qui ne le voient pas) ;
+   - donne si tu veux une **légende** à chaque dessin (facultative : elle décrit le dessin à ceux qui ne le voient pas ; sans elle, il est décrit comme « Dessin 3 sur 12 ») ;
    - le **lien Flickr** (la page du dessin sur flickr.com/photos/doublemradio) et l'**auteur** sont facultatifs. Avec un lien Flickr, un clic sur le dessin ouvre sa page Flickr dans un nouvel onglet (« Voir sur Flickr ↗ » s'affiche sous la légende) ; sans lien, il s'ouvre en grand sur le site ;
    - change l'ordre avec ↑ ↓, ou en glissant les vignettes.
 6. Appuie sur **PUBLIER**. L'admin envoie les dessins, puis fait **un seul commit** (« Ajout épisode : <titre> »). L'écran « Publié ! » indique quand l'épisode est en ligne, en général au bout d'une minute environ.
@@ -157,7 +157,7 @@ vercel.json, robots.txt, .vercelignore
 - Facultatifs : `duree`, `auteurs`, `pochette` (image carrée), `slides`, `dessins`.
 - Pour chaque slide (`slides`) : `src` et `legende` sont obligatoires ; la légende décrit la slide à ceux qui ne la voient pas. Images en 16:9, 2000 px de large, JPG qualité 85, rangées dans `images/slides/<id-épisode>/01-xxxxxx.jpg`, `02-…` dans l'ordre. Sur la page de l'épisode, la section « Les slides » (au-dessus des dessins) montre une slide à la fois : flèches, clavier ← →, swipe sur mobile, clic pour agrandir.
 - Un épisode « Dessin radio-dessiné » doit avoir au moins un dessin **ou** des slides.
-- Pour chaque dessin, `src` et `legende` sont obligatoires ; `flickr` et `auteur` sont facultatifs. `flickr` est l'adresse de la page du dessin sur Flickr ; elle doit commencer par `https://www.flickr.com/` ou `https://flic.kr/`. L'ordre de la galerie suit l'ordre de la liste, et l'orientation se lit sur l'image.
+- Pour chaque dessin, `src` est obligatoire ; `legende` est facultative (sans légende, le dessin est décrit comme « Dessin 3 sur 12 » pour les lecteurs d'écran) ; `flickr` et `auteur` sont facultatifs. `flickr` est l'adresse de la page du dessin sur Flickr ; elle doit commencer par `https://www.flickr.com/` ou `https://flic.kr/`. L'ordre de la galerie suit l'ordre de la liste, et l'orientation se lit sur l'image.
 - L'épisode n° 1 porte la bande « 1ER ÉPISODE », le plus récent la bande « NOUVEL ÉPISODE ».
 
 ### Tester en local
