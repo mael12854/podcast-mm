@@ -199,9 +199,7 @@
 .drawing__flickr {
   flex-basis: 100%; display: inline-flex; align-items: center; gap: 4px;
   font-size: var(--dm-fs-caption); font-weight: 600; color: var(--dm-gold-light);
-  text-decoration: underline; text-underline-offset: 3px;
 }
-.drawing__flickr:hover { color: var(--dm-gold); }
 
 /* ---------- Visionneuse ---------- */
 .lightbox {
