@@ -11,6 +11,7 @@ const MONTHS = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'aoû
 const SPOTIFY_RE = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?episode\/[A-Za-z0-9]+/;
 const MAX_FILES = 12;
 const MAX_SLIDES = 30;
+const FLICKR_RE = /^https:\/\/(www\.flickr\.com|flic\.kr)\/\S+$/;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -495,6 +496,7 @@ function validate(ep) {
     if (!drawings.length && !slides.length) errs.dessins = 'Ajoute au moins un dessin (ou des slides) pour un épisode radio-dessiné.';
     else if (drawings.some((d) => d.status === 'prep')) errs.dessins = 'Attends la fin de la préparation des dessins.';
     else if (drawings.some((d) => !d.legende.trim())) errs.dessins = 'Chaque dessin a besoin d\'une légende (elle décrit le dessin à ceux qui ne le voient pas).';
+    else if (drawings.some((d) => d.flickr.trim() && !FLICKR_RE.test(d.flickr.trim()))) errs.dessins = 'Le lien Flickr doit commencer par https://www.flickr.com/ ou https://flic.kr/';
   }
   return errs;
 }
@@ -551,7 +553,7 @@ form.addEventListener('submit', async (e) => {
     ep.slides = slidesList.items.map((d) => ({ ...(d.upload ? { upload: d.upload } : { src: d.src }), legende: d.legende.trim() }));
     ep.dessins = isDessin ? drawingsList.items.map((d) => ({
       ...(d.upload ? { upload: d.upload } : { src: d.src }),
-      legende: d.legende.trim(), auteur: d.auteur.trim(),
+      legende: d.legende.trim(), flickr: d.flickr.trim(), auteur: d.auteur.trim(),
     })) : [];
     const res = state.editId
       ? await api('PUT', `/api/episodes?id=${encodeURIComponent(state.editId)}`, { episode: ep, version: state.version })
@@ -638,7 +640,7 @@ function imageList(cfg) {
 
   L.load = (arr) => {
     L.items.forEach((d) => d.file && d.url && URL.revokeObjectURL(d.url));
-    L.items = (arr || []).map((d, i) => ({ key: `${cfg.prefix}e${i}-${Date.now()}`, src: d.src, url: '/' + d.src, legende: d.legende || '', auteur: d.auteur || '' }));
+    L.items = (arr || []).map((d, i) => ({ key: `${cfg.prefix}e${i}-${Date.now()}`, src: d.src, url: '/' + d.src, legende: d.legende || '', flickr: d.flickr || '', auteur: d.auteur || '' }));
     L.render();
   };
 
@@ -662,6 +664,10 @@ function imageList(cfg) {
           <input class="input input--sm" id="leg-${d.key}" data-f="legende" maxlength="${cfg.legendMax}" value="${esc(d.legende)}" placeholder="${esc(cfg.placeholder)}">
         </div>
         ${cfg.extras ? `<div class="field">
+          <label class="field__label" for="fl-${d.key}">Lien Flickr <span class="opt">facultatif</span></label>
+          <input class="input input--sm" id="fl-${d.key}" data-f="flickr" type="url" inputmode="url" autocomplete="off" maxlength="200" value="${esc(d.flickr)}" placeholder="https://www.flickr.com/photos/doublemradio/…">
+        </div>
+        <div class="field">
           <label class="field__label" for="aut-${d.key}">Auteur <span class="opt">facultatif</span></label>
           <input class="input input--sm" id="aut-${d.key}" data-f="auteur" maxlength="40" value="${esc(d.auteur)}" placeholder="Marin">
         </div>` : ''}
@@ -687,7 +693,7 @@ function imageList(cfg) {
     fieldError(cfg.err, rejected.length ? `Pas ajouté : ${rejected.join(', ')}.` : null);
     if (!ok.length) return;
     state.dirty = true;
-    const items = ok.map((file, i) => ({ key: `${cfg.prefix}n${Date.now()}-${i}`, file, url: '', legende: '', auteur: '', status: 'prep' }));
+    const items = ok.map((file, i) => ({ key: `${cfg.prefix}n${Date.now()}-${i}`, file, url: '', legende: '', flickr: '', auteur: '', status: 'prep' }));
     L.items.push(...items);
     L.render();
     for (const d of items) {
@@ -783,12 +789,14 @@ function imageList(cfg) {
   });
   listEl.addEventListener('dragend', () => { dragKey = null; lis().forEach((x) => x.classList.remove('is-dragging', 'is-target')); });
 
-  // Erreur : légende manquante
+  // Erreurs : légende manquante, lien Flickr mal formé
   L.markErrors = () => {
     L.items.forEach((d) => {
       const li = $(`.dr[data-key="${d.key}"]`, listEl);
       if (!li) return;
       $('[data-f="legende"]', li).setAttribute('aria-invalid', d.legende.trim() ? 'false' : 'true');
+      const fl = $('[data-f="flickr"]', li);
+      if (fl) fl.setAttribute('aria-invalid', d.flickr.trim() && !FLICKR_RE.test(d.flickr.trim()) ? 'true' : 'false');
     });
   };
   return L;

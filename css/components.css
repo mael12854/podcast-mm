@@ -194,6 +194,14 @@
   font-size: var(--dm-fs-caption); font-weight: 500; color: var(--dm-text-muted);
 }
 .drawing__by { color: var(--dm-text-faint); }
+/* Dessin qui renvoie vers sa page Flickr */
+.drawing__link { cursor: pointer; text-decoration: none; }
+.drawing__flickr {
+  flex-basis: 100%; display: inline-flex; align-items: center; gap: 4px;
+  font-size: var(--dm-fs-caption); font-weight: 600; color: var(--dm-gold-light);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.drawing__flickr:hover { color: var(--dm-gold); }
 
 /* ---------- Visionneuse ---------- */
 .lightbox {

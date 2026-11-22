@@ -11,6 +11,7 @@ import { readAttente, ATTENTE_PATH } from './_lib/avis-store.js';
 
 const CATS = ['chronique', 'parents', 'dessin'];
 const MAX_SLIDES = 30;
+const FLICKR_RE = /^https:\/\/(www\.flickr\.com|flic\.kr)\/\S+$/;
 const SPOTIFY_RE = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?episode\/[A-Za-z0-9]+/;
 
 function slugify(s) {
@@ -77,6 +78,11 @@ function validate(input, { id, existing }) {
     ep.dessins = list.slice(0, 12).map((d, i) => {
       const out = { src: '', legende: str(d.legende, 120) };
       if (!out.legende) errors.dessins = errors.dessins || 'Chaque dessin a besoin d\'une légende (elle décrit le dessin à ceux qui ne le voient pas).';
+      const flickr = str(d.flickr, 200);
+      if (flickr) {
+        if (!FLICKR_RE.test(flickr)) errors.dessins = errors.dessins || 'Le lien Flickr doit commencer par https://www.flickr.com/ ou https://flic.kr/';
+        out.flickr = flickr;
+      }
       const auteur = str(d.auteur, 40); if (auteur) out.auteur = auteur;
       if (typeof d.upload === 'string' && /^[0-9a-f]{40}$/.test(d.upload)) {
         out.src = `images/dessins/${id}/${String(i + 1).padStart(2, '0')}-${crypto.randomBytes(3).toString('hex')}.jpg`;
