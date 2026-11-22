@@ -39,7 +39,41 @@
         "legende": "Merci d’avoir écouté"
       }
     ],
-    "dessins": []
+    "dessins": [
+      {
+        "src": "images/dessins/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/01-75484b.jpg"
+      },
+      {
+        "src": "images/dessins/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/02-4ebb6b.jpg"
+      },
+      {
+        "src": "images/dessins/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/03-aa4635.jpg"
+      },
+      {
+        "src": "images/dessins/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/04-568614.jpg"
+      },
+      {
+        "src": "images/dessins/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/05-4cc4af.jpg"
+      },
+      {
+        "src": "images/dessins/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/06-404e49.jpg"
+      },
+      {
+        "src": "images/dessins/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/07-2c1d97.jpg"
+      },
+      {
+        "src": "images/dessins/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/08-01b33c.jpg"
+      },
+      {
+        "src": "images/dessins/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/09-ecb353.jpg"
+      },
+      {
+        "src": "images/dessins/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/10-4c13dd.jpg"
+      },
+      {
+        "src": "images/dessins/on-a-ouvert-les-telephones-marin-a-dompte-minecraft/11-e332e0.jpg"
+      }
+    ]
   },
   {
     "id": "episode-003-les-dessinateurs",
