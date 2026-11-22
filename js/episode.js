@@ -26,27 +26,41 @@ function player(ep) {
     loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>`;
 }
 
+// Pages Flickr des dessins (compte doublemradio) : seules ces adresses sont acceptées.
+const FLICKR_RE = /^https:\/\/(www\.flickr\.com|flic\.kr)\/\S+$/;
+
 function gallery(ep) {
   const d = (ep.dessins || []).filter((x) => x && x.src);
   if (ep.categorie !== 'dessin' || !d.length) return '';
-  const items = d.map((x, i) => `
-      <figure class="drawing">
-        <button class="drawing__btn" type="button" data-i="${i}" style="--tilt:${TILTS[i % 6]}deg" aria-label="Agrandir le dessin : ${esc(x.legende)}">
-          <div class="paper">
+  const items = d.map((x, i) => {
+    const flickr = FLICKR_RE.test(x.flickr || '') ? x.flickr : '';
+    const paper = `<div class="paper">
             <img class="paper__img" src="${esc(imgSrc(x.src, 640))}" ${imgSrcset(x.src, [384, 640, 1080]) ? `srcset="${esc(imgSrcset(x.src, [384, 640, 1080]))}" sizes="(min-width: 760px) 300px, 50vw"` : ''}
               data-src="${esc(x.src)}" alt="${esc(x.legende)}" loading="lazy" decoding="async">
             <span class="tape tape--${TAPES[i % 3]}" aria-hidden="true"></span>
-          </div>
-        </button>
-        <figcaption><span>${esc(x.legende)}</span>${x.auteur ? `<span class="drawing__by">· ${esc(x.auteur)}</span>` : ''}</figcaption>
-      </figure>`).join('');
+          </div>`;
+    // Avec un lien Flickr : un vrai lien vers la page du dessin (nouvel onglet). Sinon : la visionneuse.
+    const frame = flickr
+      ? `<a class="drawing__btn drawing__link" href="${esc(flickr)}" target="_blank" rel="noopener" style="--tilt:${TILTS[i % 6]}deg" aria-label="Voir ${esc(x.legende)} sur Flickr (nouvel onglet)">
+          ${paper}
+        </a>`
+      : `<button class="drawing__btn" type="button" data-i="${i}" style="--tilt:${TILTS[i % 6]}deg" aria-label="Agrandir le dessin : ${esc(x.legende)}">
+          ${paper}
+        </button>`;
+    return `
+      <figure class="drawing">
+        ${frame}
+        <figcaption><span>${esc(x.legende)}</span>${x.auteur ? `<span class="drawing__by">· ${esc(x.auteur)}</span>` : ''}${flickr
+          ? `<a class="drawing__flickr" href="${esc(flickr)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">Voir sur Flickr ↗</a>` : ''}</figcaption>
+      </figure>`;
+  }).join('');
   return `
   <section class="container container--wide" style="padding-top:clamp(48px,6vw,80px)" aria-labelledby="drawings-title">
     <div class="drawings-block">
       ${waves([[420, .16], [760, .09]])}
       <div class="drawings-block__head">
         <h2 class="h2" id="drawings-title">LES DESSINS</h2>
-        <p>Lance l'épisode et regarde les dessins pendant l'écoute. Touche un dessin pour l'agrandir.</p>
+        <p>Lance l'épisode et regarde les dessins pendant l'écoute. Touche un dessin pour l'agrandir, ou pour le voir sur Flickr quand c'est indiqué.</p>
       </div>
       <div class="gallery">${items}</div>
     </div>
@@ -111,7 +125,7 @@ function render(ep, all) {
     if (im.complete) fit(); else im.addEventListener('load', fit);
   });
   const list = (ep.dessins || []).filter((x) => x && x.src);
-  root.querySelectorAll('.drawing__btn').forEach((b) => {
+  root.querySelectorAll('button.drawing__btn').forEach((b) => {
     b.addEventListener('click', () => openLightbox(list, Number(b.dataset.i), b));
   });
 }
